@@ -9,6 +9,12 @@ class Content extends Component {
                 {/* <img src={logo} className="App-logo" alt="logo" /> */}
                 <h1 className="name" aria-label="My name is Daniel Darritchon">Daniel Darritchon</h1>
                 <h2 className="title" aria-label="I am a software developer and engineer">Software Engineer</h2>
+                <h3 className="Spotify" aria-label="I am currently listening to">Now playing on Spotify:</h3>
+                <svg width="100%" height="100%"
+                    xmlns="http://www.w3.org/2000/svg">       
+                    <image href="https://dedarritchon.vercel.app/api/spotify"/>
+                </svg>
+
 
                 {/* <p>I'm passionate about energy, space, and technology. If I'm not working on a project, you'll usually find me on a soccer field.</p>
                 <p>I have just completed my B.S. in Computer Science at the University of North Carolina - Chapel Hill.</p>
