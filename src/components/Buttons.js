@@ -18,6 +18,12 @@ const DATA = [
         label: "LinkedIn",
     },
     {
+        href: "https://open.spotify.com/user/22usjhj23c7c4s52lzjexdtmy",
+        aria: "Visit my Spotify profile to see my favorite artists",
+        icon: ["fab", "spotify"],
+        label: "Spotify",
+    },
+    {
         href: "https://drive.google.com/file/d/1ASG5JTR_lZI1b3scN3kKAgulgOTe4uNh/view?usp=sharing",
         aria: "Visit Google Drive to view and download a copy of my resume",
         icon: ["fas", "file-alt"],
