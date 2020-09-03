@@ -57,7 +57,7 @@ const PARAMS = {
         "line_linked": {
             "enable": true,
             "distance": 100,
-            "color": "#eeeeee",
+            "color": "#adadad",
             "opacity": 0.4,
             "width": 1
         },
