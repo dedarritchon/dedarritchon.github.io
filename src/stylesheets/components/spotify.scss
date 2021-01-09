@@ -1,0 +1,17 @@
+/* Spotify */
+
+.spotify-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: 2rem; 
+    padding-left: 3rem;
+    padding-bottom: 2rem;
+    opacity: 1;
+}
+
+.spotify-text {
+    left: 0;
+    transition: color .5s linear;
+    color: var(--primaryTextColor);
+}
