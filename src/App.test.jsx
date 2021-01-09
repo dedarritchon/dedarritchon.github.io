@@ -4,7 +4,7 @@ import Content from './components/Content'
 
 test('renders name', () => {
     const { getByText } = render(<Content />);
-    const linkElement = getByText(/Adam Alston/i);
+    const linkElement = getByText(/Daniel Darritchon/i);
     expect(linkElement).toBeInTheDocument();
 });
 
