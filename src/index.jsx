@@ -4,13 +4,13 @@ import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import emailjs from 'emailjs-com';
-emailjs.send('service_644bvxp','template_hibfrhg', {}, 'user_jEdjNVBkvDKKXV9RWVWKq')
-	.then((response) => {
-	   console.log('SUCCESS!', response.status, response.text);
-	}, (err) => {
-	   console.log('FAILED...', err);
-	});
+//import emailjs from 'emailjs-com';
+//emailjs.send('service_644bvxp','template_hibfrhg', {}, 'user_jEdjNVBkvDKKXV9RWVWKq')
+//	.then((response) => {
+//	   console.log('SUCCESS!', response.status, response.text);
+//	}, (err) => {
+//	   console.log('FAILED...', err);
+//	});
 
 ReactDOM.render(
     <React.StrictMode>
