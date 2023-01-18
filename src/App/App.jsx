@@ -1,18 +1,20 @@
 import React from 'react';
 
 import { ThemeProvider } from './AppContext';
-import { Toggle, Content, Buttons, Footer, Particles } from './../components';
+import { Content, Buttons, Matrix, Spotify } from './../components';
 import './app.scss';
 
+console.log("I'm stuck in the matrix, please send help!!! 😰")
+
 const App = () => {
+
   return (
     <ThemeProvider>
       <div className='app'>
-        <Toggle />
         <Content />
         <Buttons />
-        <Footer />
-        <Particles />
+        <Spotify />
+        <Matrix />
       </div>
     </ThemeProvider>
   );

@@ -21,3 +21,18 @@ body {
   justify-content: center;
   text-align: center;
 }
+
+
+.spotify-image {
+  background-color: #000000dc;
+  border-radius: 16px;
+}
+
+.spotify-image:hover {
+  background-color: #1b1b1bdc;
+  scale: 1.02;
+}
+
+.spotify-text {
+  padding-left: 20px;
+}
