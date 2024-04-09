@@ -15,6 +15,23 @@ const P = {
   `,
 };
 
+function animateTitle(Title = "Hello World ;)", delay = 300) {
+  let counter = 0;
+  let direction = true;
+  let newtitle;
+  setInterval(function () {
+      if (counter === Title.length)
+          direction = false;
+      if (counter === 1)
+          direction = true;
+      counter = (direction === true) ? ++counter : --counter;
+      newtitle = (counter === 0) ? " " : Title.slice(0, counter);
+      document.title = newtitle;
+  }, delay)
+}
+
+animateTitle();
+
 export const Matrix = () => {
 
   var initialized = false;
@@ -27,22 +44,9 @@ export const Matrix = () => {
 
   let stop = false;
 
-  function animateTitle(Title = "Hello World ;)", delay = 300) {
-    let counter = 0;
-    let direction = true;
-    let newtitle;
-    setInterval(function () {
-        if (counter === Title.length)
-            direction = false;
-        if (counter === 1)
-            direction = true;
-        counter = (direction === true) ? ++counter : --counter;
-        newtitle = (counter === 0) ? " " : Title.slice(0, counter);
-        document.title = newtitle;
-    }, delay)
-  }
-
-  animateTitle();
+  // Tracking the mouse's position
+  let mouseX = 0;
+  let mouseY = 0;
 
   window.onwheel  = function () {
     let new_color = colors[Math.floor(Math.random() * colors.length)];
@@ -58,6 +62,11 @@ export const Matrix = () => {
       new_color = colors[Math.floor(Math.random() * colors.length)];
     }
     color = new_color;
+  }
+
+  window.onmousemove = function (e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
   }
 
   document.addEventListener('keypress', (event) => {
@@ -99,7 +108,11 @@ export const Matrix = () => {
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.fillStyle = color;
 
-          ctx.font = font_size + "px arial";
+          // get pointer location
+
+          // Adjust font size based on mouseY
+          font_size = 18 + (mouseY / canvas.height) * -10 + (mouseX / canvas.width) * 10; // Adjust 32 to control the max increase in font size
+          ctx.font = font_size + "px console";
 
           for(var i = 0; i < drops.length; i++)
           {
