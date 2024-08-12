@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import { AppContext } from './../App/AppContext';
@@ -7,6 +7,9 @@ const P = {
   Container: styled.div`
     transition: background-color 0.5s linear;
     position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
     background-color: ${({ theme }) => theme.background};
     background-repeat: no-repeat;
     background-size: cover;
@@ -15,133 +18,160 @@ const P = {
   `,
 };
 
-function animateTitle(Title = "Hello World ;)", delay = 300) {
+function animateTitle(Title = 'Hello World ;)', delay = 300) {
   let counter = 0;
   let direction = true;
   let newtitle;
   setInterval(function () {
-      if (counter === Title.length)
-          direction = false;
-      if (counter === 1)
-          direction = true;
-      counter = (direction === true) ? ++counter : --counter;
-      newtitle = (counter === 0) ? " " : Title.slice(0, counter);
-      document.title = newtitle;
-  }, delay)
+    if (counter === Title.length) direction = false;
+    if (counter === 1) direction = true;
+    counter = direction === true ? ++counter : --counter;
+    newtitle = counter === 0 ? ' ' : Title.slice(0, counter);
+    document.title = newtitle;
+  }, delay);
 }
 
 animateTitle();
 
 export const Matrix = () => {
-
-  var initialized = false;
+  const canvasRef = useRef(null);
 
   const { theme } = useContext(AppContext);
 
-  let colors = ["#0F0", "#F00", "#0FF", "#FF0", "#F0F", "#FFF"];
+  let colors = ['#0F0', '#F00', '#0FF', '#FF0', '#F0F', '#FFF'];
+  let mouseColor = '#FFD700'; // Color for letters around the mouse
 
   let color = colors[Math.floor(Math.random() * colors.length)];
 
   let stop = false;
 
   // Tracking the mouse's position
-  let mouseX = 0;
-  let mouseY = 0;
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
 
-  window.onwheel  = function () {
+  let lastMouseMoveTime = 0;
+
+  const radius = 200; // Radius around the mouse to skip letters
+
+  window.onwheel = function () {
     let new_color = colors[Math.floor(Math.random() * colors.length)];
     while (new_color === color) {
       new_color = colors[Math.floor(Math.random() * colors.length)];
     }
     color = new_color;
-  }
+    mouseColor = colors[Math.floor(Math.random() * colors.length)];
+  };
 
-  window.onclick  = function () {
+  window.onclick = function () {
     let new_color = colors[Math.floor(Math.random() * colors.length)];
     while (new_color === color) {
       new_color = colors[Math.floor(Math.random() * colors.length)];
     }
     color = new_color;
-  }
+    mouseColor = colors[Math.floor(Math.random() * colors.length)];
+  };
 
   window.onmousemove = function (e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  }
 
-  document.addEventListener('keypress', (event) => {
-    alert("Welcome back, Neo.\n\nClick or Scroll your mouse to change the Matrix colors")
-  }, false);
+    const currentTime = Date.now();
 
-  var initMatrix = () => {
-    if (!initialized) {
+    if (currentTime - lastMouseMoveTime > 50) {
 
-      let canvas = document.getElementById( 'canvas' );
+      lastMouseMoveTime = currentTime;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }
+  };
 
-      let ctx = canvas.getContext('2d')
+  document.addEventListener(
+    'keypress',
+    (event) => {
+      alert(
+        'Welcome back, Neo.\n\nClick or Scroll your mouse to change the Matrix colors'
+      );
+    },
+    false
+  );
 
-      canvas.height = window.innerHeight;
-      canvas.width = window.innerWidth;
+  useEffect(() => {
+    let initialized = false;
 
-      var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*|`+-/~{[()]}ば司立肌切チじを飯端めなだごさ対全分人ぜち使";
+    const canvas = canvasRef.current;
 
-      chars = chars.split("");
+    const ctx = canvas.getContext('2d');
 
-      var font_size = 18;
-      var columns = canvas.width/font_size;
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
 
-      var drops = [];
+    var chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*|`+-/~{[()]}ば司立肌切チじを飯端めなだごさ対全分人ぜち使';
 
-      for(var x = 0; x < columns; x++)
-        drops[x] = 1;
+    chars = chars.split('');
 
-      function draw()
-      {
-        if (!stop){
+    var font_size = 18;
+    var columns = canvas.width / font_size;
 
-          if (canvas.height !== window.innerHeight || canvas.width !== window.innerWidth){
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
+    var drops = [];
+
+    for (var x = 0; x < columns; x++) drops[x] = 1;
+
+    function draw() {
+      if (!stop) {
+        if (
+          canvas.height !== window.innerHeight ||
+          canvas.width !== window.innerWidth
+        ) {
+          canvas.height = window.innerHeight;
+          canvas.width = window.innerWidth;
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = font_size + 'px console';
+
+        for (var i = 0; i < drops.length; i++) {
+          var text = chars[Math.floor(Math.random() * chars.length)];
+
+          let x = i * font_size;
+          let y = drops[i] * font_size;
+
+          // Calculate distance from mouse
+          let dx = x - mouseX;
+          let dy = y - mouseY;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+
+          // If inside the radius, adjust the position and change color
+          if (distance < radius) {
+            let angle = Math.atan2(dy, dx);
+            let offset = (radius - distance) / 2; // Adjust speed and amount of movement
+            x += Math.cos(angle) * offset;
+            y += Math.sin(angle) * offset;
+            
+            ctx.fillStyle = mouseColor; // Change color when near mouse
+          } else {
+            ctx.fillStyle = color; // Default color
           }
 
-          ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = color;
+          ctx.fillText(text, x, y);
 
-          // get pointer location
-
-          // Adjust font size based on mouseY
-          font_size = 18 + (mouseY / canvas.height) * -10 + (mouseX / canvas.width) * 10; // Adjust 32 to control the max increase in font size
-          ctx.font = font_size + "px console";
-
-          for(var i = 0; i < drops.length; i++)
-          {
-            if (!initialized){
-              color = colors[Math.floor(Math.random() * colors.length)];
-              ctx.fillStyle = color;
-            }
-    
-            var text = chars[Math.floor(Math.random()*chars.length)];
-
-            ctx.fillText(text, i*font_size, drops[i]*font_size);
-
-            if(drops[i]*font_size > canvas.height && Math.random() > 0.975){
-              drops[i] = 0;
-              initialized = true;
-            }
-            drops[i]++;
+          if (drops[i] * font_size > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+            initialized = true;
           }
+          drops[i]++;
         }
       }
-
-      setInterval(draw, 35);
-      // draw stuff
     }
-  }
+
+    const interval = setInterval(draw, 40);
+
+    return () => clearInterval(interval);
+  }, [theme, color, radius]);
 
   return (
     <P.Container theme={theme}>
-      <canvas id='canvas' ref={initMatrix}></canvas>
+      <canvas id='canvas' ref={canvasRef}></canvas>
     </P.Container>
   );
 };
