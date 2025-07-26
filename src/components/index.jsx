@@ -4,3 +4,6 @@ export * from './Buttons';
 export * from './Footer';
 export * from './Matrix';
 export * from './Spotify';
+export * from './TabNavigation';
+export * from './Profile';
+export * from './Projects';
