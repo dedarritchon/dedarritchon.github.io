@@ -61,7 +61,7 @@ export const TabNavigation = ({ children, activeTab, setActiveTab }) => {
   const { theme } = useContext(AppContext);
 
   const tabs = [
-    { id: 'console', label: 'Console' },
+    { id: 'terminal', label: 'Terminal' },
     { id: 'profile', label: 'Profile' },
     { id: 'projects', label: 'Projects' },
   ];

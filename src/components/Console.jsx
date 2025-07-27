@@ -3,14 +3,14 @@ import styled from 'styled-components';
 import { AppContext } from './../App/AppContext';
 
 const ConsoleContainer = styled.div`
-  background: #0a0a0a;
+  background: rgba(0, 0, 0, 0.90);
   border: 2px solid ${({ theme }) => theme.primaryTextColor};
   border-radius: 8px;
   padding: 1rem;
   font-family: 'Courier New', monospace;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1.4;
-  height: 500px;
+  height: 80%;
   width: 80%;
   overflow-y: auto;
   position: relative;
@@ -39,7 +39,7 @@ const ConsoleHeader = styled.div`
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #333;
   color: #888;
-  font-size: 12px;
+  font-size: 18px;
 `;
 
 const ConsoleDot = styled.div`
@@ -54,12 +54,16 @@ const ConsoleLine = styled.div`
   color: ${({ color }) => color || '#fff'};
   word-wrap: break-word;
   white-space: pre-wrap;
+  pointer-events: auto;
   
   a {
     color: #00ff00;
     text-decoration: underline;
     cursor: pointer;
     transition: color 0.3s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
     
     &:hover {
       color: #ffff00;
@@ -77,6 +81,7 @@ const InputLine = styled.div`
 const Prompt = styled.span`
   color: #00ff00;
   margin-right: 8px;
+  white-space: nowrap;
 `;
 
 const Input = styled.input`
@@ -84,7 +89,7 @@ const Input = styled.input`
   border: none;
   color: #fff;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 18px;
   outline: none;
   flex: 1;
   
@@ -103,64 +108,21 @@ const Cursor = styled.span`
   }
 `;
 
-const ProgressBar = styled.div`
-  width: 100%;
-  height: 20px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  overflow: hidden;
+const ConsoleProgressBar = styled.div`
+  font-family: 'Courier New', monospace;
   margin: 10px 0;
-  position: relative;
-`;
-
-const ProgressFill = styled.div`
-  height: 100%;
-  background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00);
-  width: ${({ progress }) => progress}%;
-  transition: width 0.3s ease;
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 1.5s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-`;
-
-const ProgressText = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-  z-index: 1;
+  color: #00ff00;
 `;
 
 const welcomeMessage = `Welcome to Daniel Darritchon's Terminal! 🚀
 
 I'm a passionate developer who loves creating amazing digital experiences.
-This is my interactive console where you can explore my skills, experience, and projects.
+This is my interactive terminal where you can explore my skills, experience, and projects.
 
 Available sections:
   📁 <a href="#" data-tab="profile">[PROFILE]</a> - Learn about me and my background
   📁 <a href="#" data-tab="projects">[PROJECTS]</a> - Explore my portfolio and work
-  📁 [CONSOLE] - You're here! Interactive terminal experience
-
-Type 'help' to see all available commands, or use the navigation tabs above to explore different sections.
+  📁 [TERMINAL] - You're here! Interactive terminal experience
 
 Ready to explore? Type 'help' to get started!`;
 
@@ -179,14 +141,168 @@ const Console = ({ active, tabId, setActiveTab }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [isOutputTyping, setIsOutputTyping] = useState(false);
   const [outputTypingText, setOutputTypingText] = useState('');
+  const [isOutputTypingHtml, setIsOutputTypingHtml] = useState(false);
+  const [currentPath, setCurrentPath] = useState('/Users/daniel');
   const consoleRef = useRef(null);
   const inputRef = useRef(null);
   const currentIndexRef = useRef(0);
   const intervalRef = useRef(null);
   const outputIntervalRef = useRef(null);
 
+  // Simulated file system structure
+  const fileSystem = {
+    '/': {
+      type: 'directory',
+      contents: {
+        'Users': { type: 'directory', contents: {} },
+        'System': { type: 'directory', contents: {} },
+        'Applications': { type: 'directory', contents: {} },
+        'Library': { type: 'directory', contents: {} },
+        'bin': { type: 'directory', contents: {} },
+        'sbin': { type: 'directory', contents: {} },
+        'etc': { type: 'directory', contents: {} },
+        'var': { type: 'directory', contents: {} },
+        'tmp': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users': {
+      type: 'directory',
+      contents: {
+        'daniel': { type: 'directory', contents: {} },
+        'Shared': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users/daniel': {
+      type: 'directory',
+      contents: {
+        'Desktop': { type: 'directory', contents: {} },
+        'Documents': { type: 'directory', contents: {} },
+        'Downloads': { type: 'directory', contents: {} },
+        'Pictures': { type: 'directory', contents: {} },
+        'Music': { type: 'directory', contents: {} },
+        'Movies': { type: 'directory', contents: {} },
+        'Applications': { type: 'directory', contents: {} },
+        'Library': { type: 'directory', contents: {} },
+        'Public': { type: 'directory', contents: {} },
+        '.bash_profile': { type: 'file', content: 'export PATH="/usr/local/bin:$PATH"\n# Custom aliases\nalias ll="ls -la"\nalias ..="cd .."\n# Welcome message\necho "Welcome to Daniel\'s terminal!"' },
+        '.zshrc': { type: 'file', content: 'source ~/.bash_profile\n# Oh My Zsh configuration\nexport ZSH="/Users/daniel/.oh-my-zsh"\nZSH_THEME="robbyrussell"\nplugins=(git docker node npm)\nsource $ZSH/oh-my-zsh.sh' },
+        'resume.pdf': { type: 'file', content: 'Daniel Darritchon - Senior Developer\n\nExperience:\n- 5+ years in web development\n- React, Node.js, Python expert\n- Team leadership experience\n\nEducation:\n- Computer Science Degree\n- Various certifications' },
+        'portfolio': { type: 'file', content: 'Portfolio Website\n\nProjects:\n- E-commerce platform\n- Real-time chat application\n- Data visualization dashboard\n- Mobile app development' }
+      }
+    },
+    '/Users/daniel/Desktop': {
+      type: 'directory',
+      contents: {
+        'project1': { type: 'directory', contents: {} },
+        'project2': { type: 'directory', contents: {} },
+        'screenshot.png': { type: 'file', content: 'Screenshot of my latest project' },
+        'notes.txt': { type: 'file', content: 'Meeting notes:\n- Discuss new feature requirements\n- Plan sprint for next week\n- Review code with team' }
+      }
+    },
+    '/Users/daniel/Documents': {
+      type: 'directory',
+      contents: {
+        'work': { type: 'directory', contents: {} },
+        'personal': { type: 'directory', contents: {} },
+        'certificates': { type: 'directory', contents: {} },
+        'report.pdf': { type: 'file', content: 'Quarterly Development Report\n\nAchievements:\n- Launched 3 new features\n- Improved performance by 40%\n- Mentored 2 junior developers' },
+        'ideas.md': { type: 'file', content: '# Project Ideas\n\n1. AI-powered code review tool\n2. Real-time collaboration platform\n3. Developer productivity dashboard\n4. Open source contribution tracker' }
+      }
+    },
+    '/Users/daniel/Downloads': {
+      type: 'directory',
+      contents: {
+        'react-tutorial.pdf': { type: 'file', content: 'Advanced React Patterns Tutorial' },
+        'docker-guide.md': { type: 'file', content: '# Docker Best Practices\n\n- Use multi-stage builds\n- Minimize layer count\n- Use .dockerignore\n- Security scanning' },
+        'node_modules': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users/daniel/Pictures': {
+      type: 'directory',
+      contents: {
+        'vacation': { type: 'directory', contents: {} },
+        'work': { type: 'directory', contents: {} },
+        'profile.jpg': { type: 'file', content: 'Professional headshot' },
+        'team-photo.jpg': { type: 'file', content: 'Team building event photo' }
+      }
+    },
+    '/Users/daniel/Music': {
+      type: 'directory',
+      contents: {
+        'playlists': { type: 'directory', contents: {} },
+        'albums': { type: 'directory', contents: {} },
+        'coding-mix.mp3': { type: 'file', content: 'Focus music for coding sessions' }
+      }
+    },
+    '/Users/daniel/Movies': {
+      type: 'directory',
+      contents: {
+        'documentaries': { type: 'directory', contents: {} },
+        'tutorials': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users/daniel/Applications': {
+      type: 'directory',
+      contents: {
+        'Visual Studio Code.app': { type: 'directory', contents: {} },
+        'Safari.app': { type: 'directory', contents: {} },
+        'Terminal.app': { type: 'directory', contents: {} },
+        'Spotify.app': { type: 'directory', contents: {} },
+        'Docker.app': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users/daniel/Library': {
+      type: 'directory',
+      contents: {
+        'Application Support': { type: 'directory', contents: {} },
+        'Preferences': { type: 'directory', contents: {} },
+        'Caches': { type: 'directory', contents: {} }
+      }
+    },
+    '/Users/daniel/Public': {
+      type: 'directory',
+      contents: {
+        'Drop Box': { type: 'directory', contents: {} }
+      }
+    }
+  };
+
+  // Helper function to get current directory contents
+  const getCurrentDirectory = () => {
+    return fileSystem[currentPath] || { type: 'directory', contents: {} };
+  };
+
+  // Helper function to resolve path
+  const resolvePath = (path) => {
+    if (path.startsWith('/')) {
+      return path;
+    }
+
+    const currentParts = currentPath.split('/').filter(Boolean);
+    const newParts = path.split('/').filter(Boolean);
+
+    for (const part of newParts) {
+      if (part === '..') {
+        if (currentParts.length > 0) {
+          currentParts.pop();
+        }
+      } else if (part !== '.') {
+        currentParts.push(part);
+      }
+    }
+
+    // Ensure we always return a valid path starting with /
+    return currentParts.length > 0 ? '/' + currentParts.join('/') : '/';
+  };
+
+  // Helper function to check if path exists
+  const pathExists = (path) => {
+    return fileSystem.hasOwnProperty(path);
+  };
+
   const handleLinkClick = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const tab = e.target.getAttribute('data-tab');
     const href = e.target.getAttribute('href');
 
@@ -229,7 +345,7 @@ const Console = ({ active, tabId, setActiveTab }) => {
     }, 20);
   };
 
-  const typeOutput = (text, isHtml = false) => {
+  const typeOutput = (text, isHtml = false, speed = 10) => {
     if (outputIntervalRef.current) {
       clearInterval(outputIntervalRef.current);
     }
@@ -237,6 +353,7 @@ const Console = ({ active, tabId, setActiveTab }) => {
     let currentIndex = 0;
     setOutputTypingText('');
     setIsOutputTyping(true);
+    setIsOutputTypingHtml(isHtml);
 
     outputIntervalRef.current = setInterval(() => {
       if (currentIndex < text.length) {
@@ -246,10 +363,11 @@ const Console = ({ active, tabId, setActiveTab }) => {
         clearInterval(outputIntervalRef.current);
         outputIntervalRef.current = null;
         setIsOutputTyping(false);
+        setIsOutputTypingHtml(false);
         setHistory((prev) => [...prev, { type: 'output', content: text, isHtml }]);
         setOutputTypingText('');
       }
-    }, 15);
+    }, speed);
   };
 
   const commands = {
@@ -266,8 +384,11 @@ const Console = ({ active, tabId, setActiveTab }) => {
   - whoami: Find out who I am
   - date: Show the current date and time
   - echo [text]: Print back the provided text
+  - ascii [text]: Convert text to ASCII art
   - matrix: Enter the matrix...
+  - ip: Show your current IP address
   - hack: Simulate a hacking sequence
+
 
 💡 Tip: Click on the [PROFILE] and [PROJECTS] links in the welcome message to navigate between sections!`,
 
@@ -332,6 +453,16 @@ I specialize in modern web technologies and enjoy building things that make a di
   
   Wake up, Neo...`,
 
+    ip: async () => {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return `Your current IP address: ${data.ip}`;
+      } catch (error) {
+        return 'Unable to fetch IP address. Please check your internet connection.';
+      }
+    },
+
     hack: () => {
       if (isHacking) {
         return 'Hack already in progress...';
@@ -369,13 +500,22 @@ I specialize in modern web technologies and enjoy building things that make a di
       let currentStep = 0;
       let currentCommand = 0;
       let commandChar = 0;
+      let hackOutput = 'Starting hack sequence...\n';
 
-      const addToHistory = (content, type = 'output') => {
-        setHistory((prev) => [...prev, { type, content }]);
+      const updateHackOutput = (newContent) => {
+        hackOutput += newContent + '\n';
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          // Find the last hack output entry or create a new one
+          const lastIndex = newHistory.length - 1;
+          if (lastIndex >= 0 && newHistory[lastIndex].type === 'hack-output') {
+            newHistory[lastIndex] = { type: 'hack-output', content: hackOutput };
+          } else {
+            newHistory.push({ type: 'hack-output', content: hackOutput });
+          }
+          return newHistory;
+        });
       };
-
-      // Start the hacking sequence
-      addToHistory('Starting hack sequence...', 'output');
 
       const progressInterval = setInterval(() => {
         setHackProgress((prev) => {
@@ -386,7 +526,6 @@ I specialize in modern web technologies and enjoy building things that make a di
             clearInterval(commandInterval);
             setTimeout(() => {
               alert('🎉 CONGRATULATIONS! You have successfully hacked the site! 🎉');
-              setHistory([]);
               setIsHacking(false);
             }, 500);
             return 100;
@@ -397,7 +536,7 @@ I specialize in modern web technologies and enjoy building things that make a di
 
       const stepInterval = setInterval(() => {
         if (currentStep < hackSteps.length) {
-          addToHistory(hackSteps[currentStep], 'output');
+          updateHackOutput(hackSteps[currentStep]);
           currentStep++;
           setHackStep(currentStep);
         } else {
@@ -410,13 +549,13 @@ I specialize in modern web technologies and enjoy building things that make a di
           const command = hackCommands[currentCommand];
           if (commandChar < command.length) {
             const typedCommand = command.substring(0, commandChar + 1);
-            addToHistory(`$ ${typedCommand}`, 'input');
+            updateHackOutput(`$ ${typedCommand}`);
             commandChar++;
           } else {
             // Command fully typed, show execution
             setTimeout(() => {
-              addToHistory(`[+] Command executed successfully`, 'output');
-              addToHistory(`[+] Access granted to system ${currentCommand + 1}`, 'output');
+              updateHackOutput(`[+] Command executed successfully`);
+              updateHackOutput(`[+] Access granted to system ${currentCommand + 1}`);
             }, 200);
 
             currentCommand++;
@@ -425,14 +564,14 @@ I specialize in modern web technologies and enjoy building things that make a di
         } else {
           clearInterval(commandInterval);
           setTimeout(() => {
-            addToHistory('', 'output');
-            addToHistory('=== SYSTEM COMPROMISED ===', 'output');
-            addToHistory('• User data: EXTRACTED', 'output');
-            addToHistory('• Security logs: DELETED', 'output');
-            addToHistory('• Backdoor: INSTALLED', 'output');
-            addToHistory('• Access granted: ROOT', 'output');
-            addToHistory('', 'output');
-            addToHistory('Welcome to the system, hacker.', 'output');
+            updateHackOutput('');
+            updateHackOutput('=== SYSTEM COMPROMISED ===');
+            updateHackOutput('• User data: EXTRACTED');
+            updateHackOutput('• Security logs: DELETED');
+            updateHackOutput('• Backdoor: INSTALLED');
+            updateHackOutput('• Access granted: ROOT');
+            updateHackOutput('');
+            updateHackOutput('Welcome to the system, hacker.');
             setIsHacking(false);
           }, 1000);
         }
@@ -440,9 +579,191 @@ I specialize in modern web technologies and enjoy building things that make a di
 
       return null;
     },
+
+    pwd: () => currentPath,
+
+    cd: (args) => {
+      if (args.length === 0) {
+        setCurrentPath('/Users/daniel');
+        return 'Changed to home directory';
+      }
+
+      const targetPath = args[0];
+      const newPath = resolvePath(targetPath);
+
+      if (pathExists(newPath)) {
+        const target = fileSystem[newPath];
+        if (target.type === 'directory') {
+          setCurrentPath(newPath);
+        } else {
+          return `Error: ${newPath} is not a directory`;
+        }
+      } else {
+        return `Error: Directory ${newPath} does not exist`;
+      }
+    },
+
+    ls: (args) => {
+      let targetPath = currentPath;
+
+      if (args.length > 0) {
+        targetPath = resolvePath(args[0]);
+      }
+
+      if (!pathExists(targetPath)) {
+        return `Error: Directory ${targetPath} does not exist`;
+      }
+
+      const directory = fileSystem[targetPath];
+      if (directory.type !== 'directory') {
+        return `Error: ${targetPath} is not a directory`;
+      }
+
+      const contents = directory.contents;
+      const items = Object.keys(contents).sort();
+
+      if (items.length === 0) {
+        return 'Directory is empty';
+      }
+
+      // Calculate columns based on terminal width (simulate ~80 chars)
+      const terminalWidth = 80;
+      const maxItemLength = Math.max(...items.map((item) => item.length)) + 2;
+      const columns = Math.max(1, Math.floor(terminalWidth / maxItemLength));
+      const rows = Math.ceil(items.length / columns);
+
+      let output = '';
+      for (let row = 0; row < rows; row++) {
+        const rowItems = [];
+        for (let col = 0; col < columns; col++) {
+          const index = row + col * rows;
+          if (index < items.length) {
+            const item = items[index];
+            const itemData = contents[item];
+            const icon = itemData.type === 'directory' ? '📁' : '📄';
+            const color = itemData.type === 'directory' ? '#00ff00' : '#ffffff';
+            const paddedItem = `${icon} <span style="color: ${color}">${item}</span>`.padEnd(maxItemLength);
+            rowItems.push(paddedItem);
+          }
+        }
+        output += rowItems.join('') + '\n';
+      }
+
+      return { content: output.trim(), isHtml: true };
+    },
+
+    cat: (args) => {
+      if (args.length === 0) {
+        return 'Usage: cat [filename]';
+      }
+
+      const fileName = args[0];
+      const filePath = resolvePath(fileName);
+
+      if (!pathExists(filePath)) {
+        return `Error: File ${filePath} does not exist`;
+      }
+
+      const file = fileSystem[filePath];
+      if (file.type !== 'file') {
+        return `Error: ${filePath} is not a file`;
+      }
+
+      return file.content;
+    },
+
+    mkdir: (args) => {
+      if (args.length === 0) {
+        return 'Usage: mkdir [directory_name]';
+      }
+
+      const dirName = args[0];
+      const newPath = currentPath === '/' ? `/${dirName}` : `${currentPath}/${dirName}`;
+
+      if (pathExists(newPath)) {
+        return `Error: Directory ${newPath} already exists`;
+      }
+
+      fileSystem[newPath] = { type: 'directory', contents: {} };
+      return `Created directory ${newPath}`;
+    },
+
+    touch: (args) => {
+      if (args.length === 0) {
+        return 'Usage: touch [filename]';
+      }
+
+      const fileName = args[0];
+      const newPath = currentPath === '/' ? `/${fileName}` : `${currentPath}/${fileName}`;
+
+      if (pathExists(newPath)) {
+        return `Error: File ${newPath} already exists`;
+      }
+
+      fileSystem[newPath] = { type: 'file', content: '' };
+      return `Created file ${newPath}`;
+    },
+
+    rm: (args) => {
+      if (args.length === 0) {
+        return 'Usage: rm [filename_or_directory]';
+      }
+
+      const itemName = args[0];
+      const itemPath = currentPath === '/' ? `/${itemName}` : `${currentPath}/${itemName}`;
+
+      if (!pathExists(itemPath)) {
+        return `Error: ${itemPath} does not exist`;
+      }
+
+      delete fileSystem[itemPath];
+      return `Removed ${itemPath}`;
+    },
+
+    find: (args) => {
+      if (args.length === 0) {
+        return 'Usage: find [search_term]';
+      }
+
+      const searchTerm = args[0].toLowerCase();
+      const results = [];
+
+      const searchInDirectory = (path, depth = 0) => {
+        if (depth > 10) {
+          return; // Prevent infinite recursion
+        }
+
+        const directory = fileSystem[path];
+        if (!directory || directory.type !== 'directory') {
+          return;
+        }
+
+        Object.keys(directory.contents).forEach((item) => {
+          const itemPath = path === '/' ? `/${item}` : `${path}/${item}`;
+          const itemData = directory.contents[item];
+
+          if (item.toLowerCase().includes(searchTerm)) {
+            const icon = itemData.type === 'directory' ? '📁' : '📄';
+            results.push(`${icon} ${itemPath}`);
+          }
+
+          if (itemData.type === 'directory') {
+            searchInDirectory(itemPath, depth + 1);
+          }
+        });
+      };
+
+      searchInDirectory('/Users/daniel');
+
+      if (results.length === 0) {
+        return `No files or directories found matching "${searchTerm}"`;
+      }
+
+      return `Found ${results.length} result(s):\n${results.join('\n')}`;
+    },
   };
 
-  const executeCommand = (input) => {
+  const executeCommand = async (input) => {
     const trimmedInput = input.trim();
     if (!trimmedInput) {return null;}
 
@@ -461,18 +782,43 @@ I specialize in modern web technologies and enjoy building things that make a di
     return text && text.includes('<a href=');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!currentInput.trim() || isOutputTyping || isTyping || isHacking) { return; }
+    if (isHacking) { return; }
 
-    setHistory((prev) => [...prev, { type: 'input', content: currentInput }]);
-    setCommandHistory((prev) => [...prev, currentInput]);
+    // Always add the input to history, even if empty
+    setHistory((prev) => [...prev, { type: 'input', content: currentInput, path: currentPath }]);
 
-    const result = executeCommand(currentInput);
+    // Only add to command history and execute if input is not empty
+    if (currentInput.trim()) {
+      setCommandHistory((prev) => [...prev, currentInput]);
 
-    if (result) {
-      const isHtml = isHtmlContent(result);
-      typeOutput(result, isHtml);
+      const result = await executeCommand(currentInput);
+
+      if (result) {
+        let isHtml = false;
+        let content = result;
+
+        // Handle the new return format from ls command
+        if (typeof result === 'object' && result.isHtml) {
+          content = result.content;
+          isHtml = true;
+        } else {
+          isHtml = isHtmlContent(result);
+        }
+
+        // Check if this is a file system command that should appear instantly
+        const fileSystemCommands = ['ls', 'pwd', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
+        const isFileSystemCommand = fileSystemCommands.includes(currentInput);
+
+        if (isFileSystemCommand) {
+          // Add directly to history without typing animation
+          setHistory((prev) => [...prev, { type: 'output', content, isHtml }]);
+        } else {
+          // Use typing animation for other commands
+          typeOutput(content, isHtml, 15);
+        }
+      }
     }
 
     setCurrentInput('');
@@ -543,7 +889,7 @@ I specialize in modern web technologies and enjoy building things that make a di
       </ConsoleHeader>
 
       {isTyping && (
-        <div>
+        <div style={{ pointerEvents: 'auto' }}>
           <ConsoleLine
             dangerouslySetInnerHTML={renderHtmlContent(typingText)}
             onClick={handleLinkClick}
@@ -556,7 +902,7 @@ I specialize in modern web technologies and enjoy building things that make a di
         <div key={index}>
           {entry.type === 'input' && (
             <InputLine>
-              <Prompt>$</Prompt>
+              <Prompt>daniel@macbook-pro {entry.path || currentPath} $</Prompt>
               <span>{entry.content}</span>
             </InputLine>
           )}
@@ -570,29 +916,41 @@ I specialize in modern web technologies and enjoy building things that make a di
               <ConsoleLine>{entry.content}</ConsoleLine>
             )
           )}
+          {entry.type === 'hack-output' && (
+            <ConsoleLine style={{ whiteSpace: 'pre-line' }}>{entry.content}</ConsoleLine>
+          )}
         </div>
       ))}
 
       {isOutputTyping && (
-        <ConsoleLine>
-          {outputTypingText}
-          <Cursor>|</Cursor>
-        </ConsoleLine>
+        <div style={{ pointerEvents: 'auto' }}>
+          {isOutputTypingHtml ? (
+            <ConsoleLine
+              dangerouslySetInnerHTML={renderHtmlContent(outputTypingText)}
+              onClick={handleLinkClick}
+            />
+          ) : (
+            <ConsoleLine>
+              {outputTypingText}
+            </ConsoleLine>
+          )}
+        </div>
       )}
+      {isOutputTyping && <Cursor>|</Cursor>}
 
       {isHacking && (
         <div>
-          <ProgressBar>
-            <ProgressFill progress={hackProgress} />
-            <ProgressText>HACKING IN PROGRESS: {Math.round(hackProgress)}%</ProgressText>
-          </ProgressBar>
+          <ConsoleProgressBar>
+            <div>HACKING IN PROGRESS: {Math.round(hackProgress)}%</div>
+            <div>[{Array(Math.max(0, Math.floor(hackProgress / 5))).fill('#').join('')}{Array(Math.max(0, 20 - Math.floor(hackProgress / 5))).fill(' ').join('')}]</div>
+          </ConsoleProgressBar>
           <ConsoleLine color='#ff6600'>Step {hackStep}/10: Executing attack sequence...</ConsoleLine>
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
         <InputLine>
-          <Prompt>$</Prompt>
+          <Prompt>daniel@macbook-pro {currentPath} $</Prompt>
           <Input
             ref={inputRef}
             value={currentInput}
@@ -600,7 +958,7 @@ I specialize in modern web technologies and enjoy building things that make a di
             onKeyDown={handleKeyDown}
             placeholder="Type 'help' for available commands..."
             autoFocus
-            disabled={isTyping || isOutputTyping || isHacking}
+            disabled={isHacking}
           />
           <Cursor>|</Cursor>
         </InputLine>

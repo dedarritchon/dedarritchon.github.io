@@ -33,12 +33,14 @@ class DropPool {
       x: 0,
       y: 0,
       speed: 1,
-      char: '',
+      chars: [],
       brightness: 1,
       age: 0,
       maxAge: 0,
       glitchTimer: 0,
-      trail: []
+      trail: [],
+      column: 0,
+      length: 0
     };
   }
 
@@ -46,23 +48,26 @@ class DropPool {
     drop.x = 0;
     drop.y = 0;
     drop.speed = 1;
-    drop.char = '';
+    drop.chars = [];
     drop.brightness = 1;
     drop.age = 0;
     drop.maxAge = 0;
     drop.glitchTimer = 0;
     drop.trail = [];
+    drop.column = 0;
+    drop.length = 0;
     this.pool.push(drop);
   }
 
   cleanup() {
-    this.active = this.active.filter((drop) => {
-      if (drop.age >= drop.maxAge) {
+    // More efficient cleanup - iterate backwards to avoid index shifting
+    for (let i = this.active.length - 1; i >= 0; i--) {
+      const drop = this.active[i];
+      if (drop.age >= drop.maxAge || drop.y > window.innerHeight + 100) {
         this.release(drop);
-        return false;
+        this.active.splice(i, 1);
       }
-      return true;
-    });
+    }
   }
 }
 
@@ -90,90 +95,108 @@ export const Matrix = () => {
   const animationRef = useRef(null);
   const dropPoolRef = useRef(new DropPool());
   const mouseRef = useRef({ x: 0, y: 0, lastMove: 0 });
-  const colorRef = useRef({ current: '#0F0', mouse: '#FFD700' });
+  const columnsRef = useRef([]);
+  const lastDropTimeRef = useRef(0);
+  const frameCountRef = useRef(0);
 
   const { theme } = useContext(AppContext);
 
-  // Memoized character set
+  // Authentic Matrix character set - mainly katakana with some Latin characters
   const chars = useMemo(() => {
-    return 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*|`+-/~{[()]}ば司立肌切チじを飯端めなだごさ対全分人ぜち使'.split('');
+    return [
+      // Katakana characters (most common in Matrix)
+      'ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'キ', 'ク', 'ケ', 'コ',
+      'サ', 'シ', 'ス', 'セ', 'ソ', 'タ', 'チ', 'ツ', 'テ', 'ト',
+      'ナ', 'ニ', 'ヌ', 'ネ', 'ノ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ',
+      'マ', 'ミ', 'ム', 'メ', 'モ', 'ヤ', 'ユ', 'ヨ', 'ラ', 'リ',
+      'ル', 'レ', 'ロ', 'ワ', 'ヲ', 'ン', 'ガ', 'ギ', 'グ', 'ゲ',
+      'ゴ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ', 'ダ', 'ヂ', 'ヅ', 'デ',
+      'ド', 'バ', 'ビ', 'ブ', 'ベ', 'ボ', 'パ', 'ピ', 'プ', 'ペ',
+      'ポ', 'ャ', 'ュ', 'ョ', 'ッ', 'ー', '・', '、', '。', '「',
+      '」', '『', '』', '（', '）', '［', '］', '｛', '｝', '【',
+      '】', '〈', '〉', '《', '》', '『', '』', '「', '」', '『',
+      // Latin characters (less common)
+      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+      'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+      'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3',
+      '4', '5', '6', '7', '8', '9', '@', '#', '$', '%',
+      '&', '*', '|', '`', '+', '-', '/', '~', '{', '[',
+      '(', ')', '}', ']', '=', '>', '<', '?', '!', ';',
+      ':', '"', "'", ',', '.', '_', '^', '\\', '|', '°'
+    ];
   }, []);
 
-  // Memoized colors
-  const colors = useMemo(() => ['#0F0', '#F00', '#0FF', '#FF0', '#F0F', '#FFF'], []);
-
-  // Performance constants
-  const FONT_SIZE = 24; // Increased font size for better visibility
-  const COLUMN_SPACING = FONT_SIZE * 1.2;
-  const MAX_DROPS = 400;
-  const GLITCH_CHANCE = 0.0001;
-  const TRAIL_LENGTH = 2;
+  // Performance constants - optimized for better performance
+  const FONT_SIZE = 18;
+  const COLUMN_WIDTH = FONT_SIZE * 1.2;
+  const MAX_DROPS = 150; // Reduced from 300
+  const GLITCH_CHANCE = 0.002; // Increased glitch frequency for better visibility
+  const TRAIL_LENGTH = 8; // Reduced from 15 for better performance
+  const DROP_SPAWN_INTERVAL = 80; // Increased interval
+  const CLEANUP_INTERVAL = 30; // Cleanup every 30 frames
 
   // Mouse event handlers with throttling
   const handleMouseMove = useCallback((e) => {
     const currentTime = Date.now();
-    if (currentTime - mouseRef.current.lastMove > 16) { // ~60fps
+    if (currentTime - mouseRef.current.lastMove > 16) {
       mouseRef.current.lastMove = currentTime;
       mouseRef.current.x = e.clientX;
       mouseRef.current.y = e.clientY;
     }
   }, []);
 
-  const handleColorChange = useCallback(() => {
-    let newColor = colors[Math.floor(Math.random() * colors.length)];
-    while (newColor === colorRef.current.current) {
-      newColor = colors[Math.floor(Math.random() * colors.length)];
-    }
-    colorRef.current.current = newColor;
-    colorRef.current.mouse = colors[Math.floor(Math.random() * colors.length)];
-  }, [colors]);
-
-  const handleWheel = useCallback(() => {
-    handleColorChange();
-  }, [handleColorChange]);
-
-  const handleClick = useCallback(() => {
-    handleColorChange();
-  }, [handleColorChange]);
-
-  // Get random character with more balanced distribution
+  // Get random character with katakana bias
   const getRandomChar = useCallback(() => {
     const rand = Math.random();
-    if (rand < 0.4) {
-      return chars[Math.floor(Math.random() * 26)]; // Lowercase letters
-    } else if (rand < 0.7) {
-      return chars[26 + Math.floor(Math.random() * 26)]; // Uppercase letters
-    } else if (rand < 0.85) {
-      return chars[52 + Math.floor(Math.random() * 9)]; // Numbers
+    if (rand < 0.7) {
+      // 70% chance for katakana (first 80 characters)
+      return chars[Math.floor(Math.random() * 80)];
     } else {
-      return chars[61 + Math.floor(Math.random() * (chars.length - 61))]; // Special chars and symbols
+      // 30% chance for Latin characters and symbols
+      return chars[80 + Math.floor(Math.random() * (chars.length - 80))];
     }
   }, [chars]);
 
-  // Create new drop
-  const createDrop = useCallback((x) => {
+  // Create new drop in a specific column
+  const createDrop = useCallback((column) => {
     if (dropPoolRef.current.active.length >= MAX_DROPS) {
       return;
     }
 
     const drop = dropPoolRef.current.get();
-    drop.x = x;
+    drop.x = column * COLUMN_WIDTH + COLUMN_WIDTH / 2;
     drop.y = -FONT_SIZE;
-    drop.speed = 1 + Math.random() * 2;
-    drop.char = getRandomChar();
+    drop.speed = 0.5 + Math.random() * 1.5;
+    drop.column = column;
+    drop.length = 3 + Math.floor(Math.random() * 12); // Reduced length range
     drop.brightness = 1;
     drop.age = 0;
-    drop.maxAge = 200 + Math.random() * 300;
+    drop.maxAge = 800 + Math.random() * 1200; // Reduced lifespan
     drop.glitchTimer = 0;
     drop.trail = [];
+    drop.chars = [];
+
+    // Generate characters for this drop
+    for (let i = 0; i < drop.length; i++) {
+      drop.chars.push(getRandomChar());
+    }
 
     dropPoolRef.current.active.push(drop);
   }, [getRandomChar]);
 
-  // Main render function
+  // Initialize columns
+  const initializeColumns = useCallback((canvas) => {
+    const numColumns = Math.floor(canvas.width / COLUMN_WIDTH);
+    columnsRef.current = new Array(numColumns).fill(0).map(() => ({
+      lastDrop: 0,
+      active: false
+    }));
+  }, []);
+
+  // Main render function - optimized
   const render = useCallback((ctx, canvas) => {
-    // Clear with fade effect
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.015)'; // Reduced fade for better visibility
+    // Clear with very subtle fade effect
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Update and render drops
@@ -182,82 +205,109 @@ export const Matrix = () => {
       drop.y += drop.speed;
       drop.age++;
 
-      // Calculate distance from mouse
+      // Calculate distance from mouse for interaction
       const dx = drop.x - mouseRef.current.x;
       const dy = drop.y - mouseRef.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const radius = 150;
+      const radius = 80; // Reduced radius
 
-      // Mouse interaction
+      // Subtle mouse interaction
       if (distance < radius) {
         const angle = Math.atan2(dy, dx);
-        const force = (radius - distance) / radius;
-        drop.x += Math.cos(angle) * force * 2;
-        drop.y += Math.sin(angle) * force * 2;
+        const force = (radius - distance) / radius; // Reduced force
+        drop.x += Math.cos(angle) * force;
+        drop.y += Math.sin(angle) * force;
       }
 
-      // Update trail
+      // Update trail more efficiently
       drop.trail.push({ x: drop.x, y: drop.y, brightness: drop.brightness });
       if (drop.trail.length > TRAIL_LENGTH) {
         drop.trail.shift();
       }
 
-      // Glitch effect
+      // Glitch effect - more noticeable
       if (Math.random() < GLITCH_CHANCE) {
-        drop.glitchTimer = 3;
-        drop.char = getRandomChar();
+        drop.glitchTimer = 5; // Increased duration
+        drop.chars[0] = getRandomChar(); // Change the first character
       }
 
-      // Render trail
-      drop.trail.forEach((trailPoint, index) => {
-        const alpha = (index / drop.trail.length) * drop.brightness * 0.08; // Increased alpha for better visibility
-        ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`;
-        ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`; // Better font for crisp rendering
+      // Decrease glitch timer
+      if (drop.glitchTimer > 0) {
+        drop.glitchTimer--;
+      }
+
+      // Render trail with reduced opacity for better readability
+      drop.trail.forEach((trailPoint, trailIndex) => {
+        const alpha = (trailIndex / drop.trail.length) * drop.brightness * 0.08; // Reduced from 0.12
+
+        // Matrix green color with trail fade
+        ctx.fillStyle = `rgba(0, 255, 70, ${alpha})`;
+        ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`;
         ctx.textBaseline = 'top';
         ctx.textAlign = 'center';
-        ctx.fillText(drop.char, Math.round(trailPoint.x), Math.round(trailPoint.y)); // Round coordinates for crisp pixels
+
+        // Render each character in the trail
+        for (let i = 0; i < drop.chars.length; i++) {
+          const charY = trailPoint.y - (i * FONT_SIZE);
+          if (charY > -FONT_SIZE && charY < canvas.height) {
+            ctx.fillText(drop.chars[i], Math.round(trailPoint.x), Math.round(charY));
+          }
+        }
       });
 
-      // Render main character
-      const brightness = Math.max(0.3, drop.brightness - (drop.age / drop.maxAge));
-      const isNearMouse = distance < radius;
-      const currentColor = isNearMouse ? colorRef.current.mouse : colorRef.current.current;
+      // Render main character with enhanced visibility
+      const brightness = Math.max(0.6, drop.brightness - (drop.age / drop.maxAge)); // Increased minimum brightness
 
-      // Convert hex to RGB and apply brightness
-      const hex = currentColor.replace('#', '');
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${brightness})`;
-      ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`; // Better font for crisp rendering
+      // Main Matrix green color with enhanced contrast
+      ctx.fillStyle = `rgba(0, 255, 70, ${brightness})`;
+      ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`;
       ctx.textBaseline = 'top';
       ctx.textAlign = 'center';
 
-      // Glitch effect
-      if (drop.glitchTimer > 0) {
-        ctx.fillText(drop.char, Math.round(drop.x + (Math.random() - 0.5) * 2), Math.round(drop.y));
-        drop.glitchTimer--;
-      } else {
-        ctx.fillText(drop.char, Math.round(drop.x), Math.round(drop.y)); // Round coordinates for crisp pixels
+      // Render each character in the drop
+      for (let i = 0; i < drop.chars.length; i++) {
+        const charY = drop.y - (i * FONT_SIZE);
+        if (charY > -FONT_SIZE && charY < canvas.height) {
+          // Enhanced glitch effect - more visible
+          if (drop.glitchTimer > 0 && i === 0) {
+            // Add random offset and color variation for glitch
+            const glitchOffset = (Math.random() - 0.5) * 4;
+            const glitchColor = Math.random() > 0.5 ? 'rgba(255, 255, 255, 0.8)' : `rgba(0, 255, 70, ${brightness})`;
+            ctx.fillStyle = glitchColor;
+            ctx.fillText(drop.chars[i], Math.round(drop.x + glitchOffset), Math.round(charY));
+            ctx.fillStyle = `rgba(0, 255, 70, ${brightness})`; // Reset color
+          } else {
+            ctx.fillText(drop.chars[i], Math.round(drop.x), Math.round(charY));
+          }
+        }
       }
 
       // Fade out at bottom
       if (drop.y > canvas.height - FONT_SIZE * 2) {
-        drop.brightness *= 0.99;
+        drop.brightness *= 0.98;
       }
     });
 
-    // Cleanup old drops
-    dropPoolRef.current.cleanup();
+    // Cleanup old drops - only every few frames for better performance
+    frameCountRef.current++;
+    if (frameCountRef.current % CLEANUP_INTERVAL === 0) {
+      dropPoolRef.current.cleanup();
+    }
 
-    // Create new drops with truly random distribution across the entire width
-    const maxDropsPerFrame = Math.floor(canvas.width / COLUMN_SPACING * 0.05); // Scale with screen width
-    for (let i = 0; i < maxDropsPerFrame; i++) {
-      if (Math.random() < 0.3) { // 30% chance per potential drop
-        // Random position across entire screen width
-        const randomX = Math.random() * canvas.width;
-        createDrop(randomX);
+    // Create new drops in columns - less frequent
+    const currentTime = Date.now();
+    if (currentTime - lastDropTimeRef.current > DROP_SPAWN_INTERVAL) {
+      lastDropTimeRef.current = currentTime;
+
+      // Find available columns
+      const availableColumns = columnsRef.current
+        .map((col, index) => ({ ...col, index }))
+        .filter((col) => currentTime - col.lastDrop > 1200 + Math.random() * 2000);
+
+      if (availableColumns.length > 0) {
+        const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+        createDrop(randomColumn.index);
+        columnsRef.current[randomColumn.index].lastDrop = currentTime;
       }
     }
   }, [createDrop, getRandomChar]);
@@ -279,21 +329,28 @@ export const Matrix = () => {
       // Set up crisp text rendering
       ctx.imageSmoothingEnabled = false;
       ctx.textRenderingOptimization = 'optimizeSpeed';
+
+      // Reinitialize columns on resize
+      initializeColumns(canvas);
     }
 
     render(ctx, canvas);
     animationRef.current = requestAnimationFrame(animate);
-  }, [render]);
+  }, [render, initializeColumns]);
 
   useEffect(() => {
     // Initialize mouse position
     mouseRef.current.x = window.innerWidth / 2;
     mouseRef.current.y = window.innerHeight / 2;
 
+    // Initialize columns
+    const canvas = canvasRef.current;
+    if (canvas) {
+      initializeColumns(canvas);
+    }
+
     // Event listeners
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('click', handleClick, { passive: true });
 
     // Start animation
     animate();
@@ -304,10 +361,8 @@ export const Matrix = () => {
         cancelAnimationFrame(animationRef.current);
       }
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('click', handleClick);
     };
-  }, [animate, handleMouseMove, handleWheel, handleClick]);
+  }, [animate, handleMouseMove, initializeColumns]);
 
   return (
     <P.Container theme={theme}>
@@ -316,8 +371,6 @@ export const Matrix = () => {
         ref={canvasRef}
         style={{
           display: 'block',
-          imageRendering: 'crisp-edges', // For crisp text
-          imageRendering: '-webkit-optimize-contrast',
           imageRendering: 'pixelated'
         }}
       />
