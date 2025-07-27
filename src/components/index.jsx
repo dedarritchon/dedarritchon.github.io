@@ -7,3 +7,4 @@ export * from './Spotify';
 export * from './TabNavigation';
 export * from './Profile';
 export * from './Projects';
+export { default as Console } from './Console';

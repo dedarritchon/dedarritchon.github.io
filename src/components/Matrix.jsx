@@ -103,10 +103,10 @@ export const Matrix = () => {
   const colors = useMemo(() => ['#0F0', '#F00', '#0FF', '#FF0', '#F0F', '#FFF'], []);
 
   // Performance constants
-  const FONT_SIZE = 20; // Increased font size for better visibility
+  const FONT_SIZE = 24; // Increased font size for better visibility
   const COLUMN_SPACING = FONT_SIZE * 1.2;
   const MAX_DROPS = 400;
-  const GLITCH_CHANCE = 0.001;
+  const GLITCH_CHANCE = 0.0001;
   const TRAIL_LENGTH = 2;
 
   // Mouse event handlers with throttling
@@ -136,17 +136,17 @@ export const Matrix = () => {
     handleColorChange();
   }, [handleColorChange]);
 
-  // Get random character with weighted distribution
+  // Get random character with more balanced distribution
   const getRandomChar = useCallback(() => {
     const rand = Math.random();
-    if (rand < 0.6) {
-      return chars[Math.floor(Math.random() * 26)]; // Letters
-    } else if (rand < 0.8) {
-      return chars[26 + Math.floor(Math.random() * 26)]; // Uppercase
-    } else if (rand < 0.9) {
+    if (rand < 0.4) {
+      return chars[Math.floor(Math.random() * 26)]; // Lowercase letters
+    } else if (rand < 0.7) {
+      return chars[26 + Math.floor(Math.random() * 26)]; // Uppercase letters
+    } else if (rand < 0.85) {
       return chars[52 + Math.floor(Math.random() * 9)]; // Numbers
     } else {
-      return chars[61 + Math.floor(Math.random() * (chars.length - 61))]; // Special chars
+      return chars[61 + Math.floor(Math.random() * (chars.length - 61))]; // Special chars and symbols
     }
   }, [chars]);
 
@@ -251,11 +251,13 @@ export const Matrix = () => {
     // Cleanup old drops
     dropPoolRef.current.cleanup();
 
-    // Create new drops
-    const columns = Math.floor(canvas.width / COLUMN_SPACING);
-    for (let i = 0; i < columns; i++) {
-      if (Math.random() < 0.05) { // Higher spawn rate for continuous flow
-        createDrop(i * COLUMN_SPACING);
+    // Create new drops with truly random distribution across the entire width
+    const maxDropsPerFrame = Math.floor(canvas.width / COLUMN_SPACING * 0.05); // Scale with screen width
+    for (let i = 0; i < maxDropsPerFrame; i++) {
+      if (Math.random() < 0.3) { // 30% chance per potential drop
+        // Random position across entire screen width
+        const randomX = Math.random() * canvas.width;
+        createDrop(randomX);
       }
     }
   }, [createDrop, getRandomChar]);
@@ -306,18 +308,6 @@ export const Matrix = () => {
       window.removeEventListener('click', handleClick);
     };
   }, [animate, handleMouseMove, handleWheel, handleClick]);
-
-  // Keypress event for the Neo message
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      alert(
-        'Welcome back, Neo.\n\nClick or Scroll your mouse to change the Matrix colors'
-      );
-    };
-
-    document.addEventListener('keypress', handleKeyPress);
-    return () => document.removeEventListener('keypress', handleKeyPress);
-  }, []);
 
   return (
     <P.Container theme={theme}>
