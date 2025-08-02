@@ -33,14 +33,19 @@ class DropPool {
       x: 0,
       y: 0,
       speed: 1,
-      chars: [],
+      char: '',
       brightness: 1,
       age: 0,
       maxAge: 0,
-      glitchTimer: 0,
-      trail: [],
+      changeTimer: 0,
+      changeInterval: 0,
       column: 0,
-      length: 0
+      layer: 0, // 0 = back, 1 = middle, 2 = front
+      fadeOutY: 0, // Y position where character starts fading out
+      size: 1, // Size multiplier for the character
+      trail: [], // Array to store trail positions and characters
+      trailLength: 0, // Length of the trail
+      trailTimer: 0 // Timer for trail updates
     };
   }
 
@@ -48,14 +53,19 @@ class DropPool {
     drop.x = 0;
     drop.y = 0;
     drop.speed = 1;
-    drop.chars = [];
+    drop.char = '';
     drop.brightness = 1;
     drop.age = 0;
     drop.maxAge = 0;
-    drop.glitchTimer = 0;
-    drop.trail = [];
+    drop.changeTimer = 0;
+    drop.changeInterval = 0;
     drop.column = 0;
-    drop.length = 0;
+    drop.layer = 0;
+    drop.fadeOutY = 0;
+    drop.size = 1;
+    drop.trail = [];
+    drop.trailLength = 0;
+    drop.trailTimer = 0;
     this.pool.push(drop);
   }
 
@@ -128,12 +138,12 @@ export const Matrix = () => {
 
   // Performance constants - optimized for better performance
   const FONT_SIZE = 18;
-  const COLUMN_WIDTH = FONT_SIZE * 1.2;
-  const MAX_DROPS = 150; // Reduced from 300
-  const GLITCH_CHANCE = 0.002; // Increased glitch frequency for better visibility
-  const TRAIL_LENGTH = 8; // Reduced from 15 for better performance
-  const DROP_SPAWN_INTERVAL = 80; // Increased interval
-  const CLEANUP_INTERVAL = 30; // Cleanup every 30 frames
+  const COLUMN_WIDTH = FONT_SIZE * 2.5; // Much wider spacing between columns
+  const MAX_DROPS = 300; // Reduced for less density
+  const DROP_SPAWN_INTERVAL = 500; // More frequent spawning for consistency
+  const CLEANUP_INTERVAL = 10; // Cleanup every 10 frames
+  const TRAIL_UPDATE_INTERVAL = 8; // Slower trail updates (every 8 frames)
+  const DROP_SPEED = 0.5; // Slow speed for falling effect
 
   // Mouse event handlers with throttling
   const handleMouseMove = useCallback((e) => {
@@ -148,13 +158,16 @@ export const Matrix = () => {
   // Get random character with katakana bias
   const getRandomChar = useCallback(() => {
     const rand = Math.random();
-    if (rand < 0.7) {
-      // 70% chance for katakana (first 80 characters)
-      return chars[Math.floor(Math.random() * 80)];
+    let char;
+    if (rand < 0.8) {
+      // 80% chance for katakana (first 80 characters)
+      char = chars[Math.floor(Math.random() * 80)];
     } else {
-      // 30% chance for Latin characters and symbols
-      return chars[80 + Math.floor(Math.random() * (chars.length - 80))];
+      // 20% chance for Latin characters and symbols
+      char = chars[80 + Math.floor(Math.random() * (chars.length - 80))];
     }
+    // Ensure we always return a valid character
+    return char || chars[0] || 'ア';
   }, [chars]);
 
   // Create new drop in a specific column
@@ -165,20 +178,59 @@ export const Matrix = () => {
 
     const drop = dropPoolRef.current.get();
     drop.x = column * COLUMN_WIDTH + COLUMN_WIDTH / 2;
+    // Start drops at the top of the screen
     drop.y = -FONT_SIZE;
-    drop.speed = 0.5 + Math.random() * 1.5;
+    drop.speed = DROP_SPEED; // Use fixed speed for consistency
     drop.column = column;
-    drop.length = 3 + Math.floor(Math.random() * 12); // Reduced length range
     drop.brightness = 1;
     drop.age = 0;
-    drop.maxAge = 800 + Math.random() * 1200; // Reduced lifespan
-    drop.glitchTimer = 0;
-    drop.trail = [];
-    drop.chars = [];
+    drop.maxAge = 2000 + Math.random() * 2000; // Longer lifespan for more persistent drops
+    drop.changeTimer = 0;
+    drop.changeInterval = 120 + Math.random() * 180; // Characters change much less frequently (120-300 frames)
+    drop.char = getRandomChar();
 
-    // Generate characters for this drop
-    for (let i = 0; i < drop.length; i++) {
-      drop.chars.push(getRandomChar());
+    // Assign layer for depth effect
+    const layerRand = Math.random();
+    if (layerRand < 0.6) {
+      drop.layer = 0; // Back layer - 60% of drops
+    } else if (layerRand < 0.9) {
+      drop.layer = 1; // Middle layer - 30% of drops
+    } else {
+      drop.layer = 2; // Front layer - 10% of drops
+    }
+
+    // Set size based on layer
+    if (drop.layer === 0) {
+      drop.size = 0.6 + Math.random() * 0.2; // Small (0.6-0.8x)
+    } else if (drop.layer === 1) {
+      drop.size = 1 + Math.random() * 0.2; // Medium (0.9-1.1x)
+    } else {
+      drop.size = 1.3 + Math.random() * 0.4; // Large (1.3-1.7x)
+    }
+
+    // Set trail length based on layer for column effect
+    if (drop.layer === 0) {
+      drop.trailLength = 8 + Math.floor(Math.random() * 6); // 8-14 characters for back layer
+    } else if (drop.layer === 1) {
+      drop.trailLength = 12 + Math.floor(Math.random() * 8); // 12-20 characters for middle layer
+    } else {
+      drop.trailLength = 15 + Math.floor(Math.random() * 10); // 15-25 characters for front layer
+    }
+
+    drop.trail = [];
+    drop.trailTimer = 0;
+
+    // Set fade out position - most drops go all the way to bottom for consistency
+    const fadeOutRand = Math.random();
+    if (fadeOutRand < 0.1) {
+      // 10% disappear early (between 85-95% of screen height)
+      drop.fadeOutY = window.innerHeight * (0.85 + Math.random() * 0.1);
+    } else if (fadeOutRand < 0.2) {
+      // 10% disappear mid-way (between 95-98% of screen height)
+      drop.fadeOutY = window.innerHeight * (0.95 + Math.random() * 0.03);
+    } else {
+      // 80% go all the way to bottom for more consistent visual effect
+      drop.fadeOutY = window.innerHeight + FONT_SIZE;
     }
 
     dropPoolRef.current.active.push(drop);
@@ -193,98 +245,133 @@ export const Matrix = () => {
     }));
   }, []);
 
-  // Main render function - optimized
+  // Main render function - optimized for single characters
   const render = useCallback((ctx, canvas) => {
     // Clear with very subtle fade effect
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Track occupied positions in each column to prevent overlapping
+    const columnOccupancy = new Map();
+
+    // Sort drops by layer for proper depth rendering (back to front)
+    const sortedDrops = [...dropPoolRef.current.active].sort((a, b) => a.layer - b.layer);
+
     // Update and render drops
-    dropPoolRef.current.active.forEach((drop) => {
-      // Update position
+    sortedDrops.forEach((drop) => {
+      // Update position with fixed speed
       drop.y += drop.speed;
       drop.age++;
+      drop.changeTimer++;
+      drop.trailTimer++;
 
       // Calculate distance from mouse for interaction
       const dx = drop.x - mouseRef.current.x;
       const dy = drop.y - mouseRef.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const radius = 80; // Reduced radius
+      const radius = 100;
 
       // Subtle mouse interaction
       if (distance < radius) {
         const angle = Math.atan2(dy, dx);
-        const force = (radius - distance) / radius; // Reduced force
+        const force = (radius - distance) / radius;
         drop.x += Math.cos(angle) * force;
         drop.y += Math.sin(angle) * force;
       }
 
-      // Update trail more efficiently
-      drop.trail.push({ x: drop.x, y: drop.y, brightness: drop.brightness });
-      if (drop.trail.length > TRAIL_LENGTH) {
-        drop.trail.shift();
+      // Update trail positions - create falling column effect
+      if (drop.trailTimer >= TRAIL_UPDATE_INTERVAL) { // Use fixed interval
+        // Add new trail entry at the top of the column
+        if (Math.random() < 0.3) { // 30% chance to add new trail entry
+          drop.trail.push({
+            x: drop.x,
+            y: drop.y,
+            char: getRandomChar(),
+            age: 0
+          });
+        }
+
+        drop.trailTimer = 0;
       }
 
-      // Glitch effect - more noticeable
-      if (Math.random() < GLITCH_CHANCE) {
-        drop.glitchTimer = 5; // Increased duration
-        drop.chars[0] = getRandomChar(); // Change the first character
+      // Keep trail entries to create column effect - remove old ones that are off screen
+      drop.trail = drop.trail.filter((trailEntry) =>
+        trailEntry.y < canvas.height + FONT_SIZE * 2
+      );
+
+      // Limit trail length to prevent too many characters
+      if (drop.trail.length > drop.trailLength) {
+        drop.trail = drop.trail.slice(-drop.trailLength);
       }
 
-      // Decrease glitch timer
-      if (drop.glitchTimer > 0) {
-        drop.glitchTimer--;
+      // Change character periodically (like in the movie)
+      if (drop.changeTimer >= drop.changeInterval) {
+        drop.char = getRandomChar();
+        drop.changeTimer = 0;
+        // Randomize the next change interval - much longer intervals
+        drop.changeInterval = 150 + Math.random() * 300;
       }
 
-      // Render trail with reduced opacity for better readability
-      drop.trail.forEach((trailPoint, trailIndex) => {
-        const alpha = (trailIndex / drop.trail.length) * drop.brightness * 0.08; // Reduced from 0.12
+      // Calculate brightness based on age and position
+      let brightness = Math.max(0.3, 1 - (drop.age / drop.maxAge));
 
-        // Matrix green color with trail fade
-        ctx.fillStyle = `rgba(0, 255, 70, ${alpha})`;
-        ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`;
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'center';
+      // Apply layer-based brightness
+      if (drop.layer === 0) {
+        brightness *= 0.2; // Back layer - darker
+      } else if (drop.layer === 1) {
+        brightness *= 0.5; // Middle layer - medium brightness
+      } else {
+        brightness *= 1.0; // Front layer - full brightness
+      }
 
-        // Render each character in the trail
-        for (let i = 0; i < drop.chars.length; i++) {
-          const charY = trailPoint.y - (i * FONT_SIZE);
-          if (charY > -FONT_SIZE && charY < canvas.height) {
-            ctx.fillText(drop.chars[i], Math.round(trailPoint.x), Math.round(charY));
-          }
+      // Fade out based on fadeOutY position
+      if (drop.y > drop.fadeOutY) {
+        const fadeProgress = (drop.y - drop.fadeOutY) / (FONT_SIZE * 2);
+        brightness *= Math.max(0, 1 - fadeProgress);
+      }
+
+      // Render all trail entries to create column effect
+      drop.trail.forEach((trailEntry, index) => {
+        // Calculate trail brightness - newer entries (higher index) are brighter
+        const trailBrightness = brightness * (0.2 + (index / drop.trail.length) * 0.8);
+
+        // Check if this position is already occupied in this column
+        const columnKey = `${drop.column}-${Math.round(trailEntry.y / FONT_SIZE)}`;
+        if (columnOccupancy.has(columnKey)) {
+          return; // Skip rendering if position is occupied
+        }
+        columnOccupancy.set(columnKey, true);
+
+        if (trailEntry.y > -FONT_SIZE && trailEntry.y < canvas.height) {
+          ctx.fillStyle = `rgba(0, 255, 70, ${trailBrightness})`;
+          ctx.font = `bold ${Math.round(FONT_SIZE * drop.size * 0.9)}px 'Courier New', monospace`;
+          ctx.textBaseline = 'top';
+          ctx.textAlign = 'center';
+          ctx.fillText(trailEntry.char, Math.round(trailEntry.x), Math.round(trailEntry.y));
         }
       });
 
-      // Render main character with enhanced visibility
-      const brightness = Math.max(0.6, drop.brightness - (drop.age / drop.maxAge)); // Increased minimum brightness
+      // Render main character at the top of the column
+      if (drop.y > -FONT_SIZE && drop.y < canvas.height && brightness > 0.05 && drop.char) {
+        // Check if main character position is occupied
+        const mainColumnKey = `${drop.column}-${Math.round(drop.y / FONT_SIZE)}`;
+        if (!columnOccupancy.has(mainColumnKey)) {
+          columnOccupancy.set(mainColumnKey, true);
 
-      // Main Matrix green color with enhanced contrast
-      ctx.fillStyle = `rgba(0, 255, 70, ${brightness})`;
-      ctx.font = `bold ${FONT_SIZE}px 'Courier New', monospace`;
-      ctx.textBaseline = 'top';
-      ctx.textAlign = 'center';
+          // Matrix green color with authentic brightness
+          ctx.fillStyle = `rgba(0, 255, 70, ${brightness * drop.brightness})`;
+          ctx.font = `bold ${Math.round(FONT_SIZE * drop.size)}px 'Courier New', monospace`;
+          ctx.textBaseline = 'top';
+          ctx.textAlign = 'center';
 
-      // Render each character in the drop
-      for (let i = 0; i < drop.chars.length; i++) {
-        const charY = drop.y - (i * FONT_SIZE);
-        if (charY > -FONT_SIZE && charY < canvas.height) {
-          // Enhanced glitch effect - more visible
-          if (drop.glitchTimer > 0 && i === 0) {
-            // Add random offset and color variation for glitch
-            const glitchOffset = (Math.random() - 0.5) * 4;
-            const glitchColor = Math.random() > 0.5 ? 'rgba(255, 255, 255, 0.8)' : `rgba(0, 255, 70, ${brightness})`;
-            ctx.fillStyle = glitchColor;
-            ctx.fillText(drop.chars[i], Math.round(drop.x + glitchOffset), Math.round(charY));
-            ctx.fillStyle = `rgba(0, 255, 70, ${brightness})`; // Reset color
+          // Add subtle glitch effect occasionally
+          if (Math.random() < 0.001) {
+            const glitchOffset = (Math.random() - 0.5) * 3;
+            ctx.fillText(drop.char, Math.round(drop.x + glitchOffset), Math.round(drop.y));
           } else {
-            ctx.fillText(drop.chars[i], Math.round(drop.x), Math.round(charY));
+            ctx.fillText(drop.char, Math.round(drop.x), Math.round(drop.y));
           }
         }
-      }
-
-      // Fade out at bottom
-      if (drop.y > canvas.height - FONT_SIZE * 2) {
-        drop.brightness *= 0.98;
       }
     });
 
@@ -294,20 +381,30 @@ export const Matrix = () => {
       dropPoolRef.current.cleanup();
     }
 
-    // Create new drops in columns - less frequent
+    // Create new drops in columns - more frequent for authentic density
     const currentTime = Date.now();
     if (currentTime - lastDropTimeRef.current > DROP_SPAWN_INTERVAL) {
       lastDropTimeRef.current = currentTime;
 
-      // Find available columns
+      // Find available columns with shorter delays for more consistent spawning
       const availableColumns = columnsRef.current
         .map((col, index) => ({ ...col, index }))
-        .filter((col) => currentTime - col.lastDrop > 1200 + Math.random() * 2000);
+        .filter((col) => currentTime - col.lastDrop > 200 + Math.random() * 400); // Shorter delays for consistency
 
       if (availableColumns.length > 0) {
-        const randomColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-        createDrop(randomColumn.index);
-        columnsRef.current[randomColumn.index].lastDrop = currentTime;
+        // Create more drops per cycle for consistency
+        const numDropsToCreate = Math.min(
+          Math.floor(availableColumns.length * 0.3), // Create drops in 30% of available columns
+          Math.max(1, Math.floor((MAX_DROPS - dropPoolRef.current.active.length) * 0.15)) // More aggressive spawning
+        );
+
+        for (let i = 0; i < numDropsToCreate && availableColumns.length > 0; i++) {
+          const randomIndex = Math.floor(Math.random() * availableColumns.length);
+          const randomColumn = availableColumns[randomIndex];
+          createDrop(randomColumn.index);
+          columnsRef.current[randomColumn.index].lastDrop = currentTime;
+          availableColumns.splice(randomIndex, 1); // Remove used column from available list
+        }
       }
     }
   }, [createDrop, getRandomChar]);

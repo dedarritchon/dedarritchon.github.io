@@ -18,6 +18,22 @@ const ConsoleContainer = styled.div`
   box-shadow: 0 0 20px ${({ theme }) => theme.primaryTextColor}20;
   text-align: left;
   
+  @media (max-width: 768px) {
+    height: 90%;
+    width: 90%;
+    padding: 0.75rem;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 85%;
+    width: 90%;
+    padding: 0.5rem;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+  
   &::before {
     content: '';
     position: absolute;
@@ -28,6 +44,10 @@ const ConsoleContainer = styled.div`
     background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
     pointer-events: none;
     z-index: 1;
+    
+    @media (max-width: 768px) {
+      height: 20px;
+    }
   }
 `;
 
@@ -40,6 +60,20 @@ const ConsoleHeader = styled.div`
   border-bottom: 1px solid #333;
   color: #888;
   font-size: 18px;
+  
+  @media (max-width: 768px) {
+    gap: 6px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 4px;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    font-size: 12px;
+  }
 `;
 
 const ConsoleDot = styled.div`
@@ -47,6 +81,16 @@ const ConsoleDot = styled.div`
   height: 12px;
   border-radius: 50%;
   background: ${({ color }) => color};
+  
+  @media (max-width: 768px) {
+    width: 10px;
+    height: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 8px;
+    height: 8px;
+  }
 `;
 
 const ConsoleLine = styled.div`
@@ -55,6 +99,16 @@ const ConsoleLine = styled.div`
   word-wrap: break-word;
   white-space: pre-wrap;
   pointer-events: auto;
+  
+  @media (max-width: 768px) {
+    margin: 3px 0;
+    line-height: 1.3;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 2px 0;
+    line-height: 1.2;
+  }
   
   a {
     color: #00ff00;
@@ -69,6 +123,11 @@ const ConsoleLine = styled.div`
       color: #ffff00;
       text-decoration: none;
     }
+    
+    @media (max-width: 768px) {
+      padding: 2px 0;
+      display: inline-block;
+    }
   }
 `;
 
@@ -76,12 +135,31 @@ const InputLine = styled.div`
   display: flex;
   align-items: center;
   margin: 4px 0;
+  
+  @media (max-width: 768px) {
+    margin: 3px 0;
+    flex-wrap: wrap;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 2px 0;
+  }
 `;
 
 const Prompt = styled.span`
   color: #00ff00;
   margin-right: 8px;
   white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    margin-right: 6px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-right: 4px;
+    font-size: 12px;
+  }
 `;
 
 const Input = styled.input`
@@ -92,15 +170,37 @@ const Input = styled.input`
   font-size: 18px;
   outline: none;
   flex: 1;
+  caret-color: #00ff00;
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+    min-width: 0;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
   
   &::placeholder {
     color: #666;
+  }
+  
+  &:focus {
+    outline: none;
   }
 `;
 
 const Cursor = styled.span`
   color: #00ff00;
   animation: blink 1s infinite;
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
   
   @keyframes blink {
     0%, 50% { opacity: 1; }
@@ -112,9 +212,81 @@ const ConsoleProgressBar = styled.div`
   font-family: 'Courier New', monospace;
   margin: 10px 0;
   color: #00ff00;
+  
+  @media (max-width: 768px) {
+    margin: 8px 0;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 6px 0;
+    font-size: 12px;
+  }
 `;
 
-const welcomeMessage = `Welcome to Daniel Darritchon's Terminal! 🚀
+const SuggestionsContainer = styled.div`
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #00ff00;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-bottom: 4px;
+  
+  @media (max-width: 768px) {
+    max-height: 150px;
+  }
+  
+  @media (max-width: 480px) {
+    max-height: 120px;
+  }
+`;
+
+const SuggestionItem = styled.div`
+  padding: 8px 12px;
+  cursor: pointer;
+  color: ${({ isSelected }) => isSelected ? '#000' : '#00ff00'};
+  background: ${({ isSelected }) => isSelected ? '#00ff00' : 'transparent'};
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  
+  &:hover {
+    background: ${({ isSelected }) => isSelected ? '#00ff00' : 'rgba(0, 255, 0, 0.1)'};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+`;
+
+const SuggestionHint = styled.div`
+  color: #666;
+  font-size: 14px;
+  padding: 4px 12px;
+  border-top: 1px solid #333;
+  
+  @media (max-width: 768px) {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+`;
+
+const welcomeMessage = `Welcome to <a href="https://dedarri.com">dedarri.com</a>! 🚀
 
 I'm a passionate developer who loves creating amazing digital experiences.
 This is my interactive terminal where you can explore my skills, experience, and projects.
@@ -143,6 +315,9 @@ const Console = ({ active, tabId, setActiveTab }) => {
   const [outputTypingText, setOutputTypingText] = useState('');
   const [isOutputTypingHtml, setIsOutputTypingHtml] = useState(false);
   const [currentPath, setCurrentPath] = useState('/Users/daniel');
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionIndex, setSuggestionIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const consoleRef = useRef(null);
   const inputRef = useRef(null);
   const currentIndexRef = useRef(0);
@@ -163,6 +338,78 @@ const Console = ({ active, tabId, setActiveTab }) => {
         'etc': { type: 'directory', contents: {} },
         'var': { type: 'directory', contents: {} },
         'tmp': { type: 'directory', contents: {} }
+      }
+    },
+    '/System': {
+      type: 'directory',
+      contents: {
+        'Library': { type: 'directory', contents: {} },
+        'Applications': { type: 'directory', contents: {} },
+        'Volumes': { type: 'directory', contents: {} }
+      }
+    },
+    '/Applications': {
+      type: 'directory',
+      contents: {
+        'Utilities': { type: 'directory', contents: {} },
+        'System Preferences.app': { type: 'directory', contents: {} },
+        'Safari.app': { type: 'directory', contents: {} },
+        'Mail.app': { type: 'directory', contents: {} },
+        'Messages.app': { type: 'directory', contents: {} }
+      }
+    },
+    '/Library': {
+      type: 'directory',
+      contents: {
+        'Application Support': { type: 'directory', contents: {} },
+        'Preferences': { type: 'directory', contents: {} },
+        'Caches': { type: 'directory', contents: {} },
+        'Fonts': { type: 'directory', contents: {} }
+      }
+    },
+    '/bin': {
+      type: 'directory',
+      contents: {
+        'ls': { type: 'file', content: 'Binary executable for listing directory contents' },
+        'cd': { type: 'file', content: 'Binary executable for changing directories' },
+        'cat': { type: 'file', content: 'Binary executable for concatenating files' },
+        'mkdir': { type: 'file', content: 'Binary executable for making directories' },
+        'rm': { type: 'file', content: 'Binary executable for removing files' }
+      }
+    },
+    '/sbin': {
+      type: 'directory',
+      contents: {
+        'mount': { type: 'file', content: 'System binary for mounting filesystems' },
+        'fsck': { type: 'file', content: 'System binary for filesystem check' },
+        'ifconfig': { type: 'file', content: 'System binary for network interface configuration' },
+        'shutdown': { type: 'file', content: 'System binary for system shutdown' }
+      }
+    },
+    '/etc': {
+      type: 'directory',
+      contents: {
+        'hosts': { type: 'file', content: 'Host name to IP address mapping' },
+        'passwd': { type: 'file', content: 'User account information' },
+        'group': { type: 'file', content: 'Group account information' },
+        'resolv.conf': { type: 'file', content: 'DNS resolver configuration' }
+      }
+    },
+    '/var': {
+      type: 'directory',
+      contents: {
+        'log': { type: 'directory', contents: {} },
+        'tmp': { type: 'directory', contents: {} },
+        'spool': { type: 'directory', contents: {} },
+        'cache': { type: 'directory', contents: {} }
+      }
+    },
+    '/tmp': {
+      type: 'directory',
+      contents: {
+        'temp_file1.txt': { type: 'file', content: 'Temporary file 1' },
+        'temp_file2.txt': { type: 'file', content: 'Temporary file 2' },
+        'cache': { type: 'directory', contents: {} }
       }
     },
     '/Users': {
@@ -300,6 +547,150 @@ const Console = ({ active, tabId, setActiveTab }) => {
     return fileSystem.hasOwnProperty(path);
   };
 
+  // Get all available commands
+  const getAvailableCommands = () => {
+    return Object.keys(commands);
+  };
+
+  // Get suggestions for tab completion
+  const getSuggestions = (input) => {
+    if (!input.trim()) {
+      return [];
+    }
+
+    const availableCommands = getAvailableCommands();
+    const inputLower = input.toLowerCase();
+
+    // Filter commands that start with the input
+    const matchingCommands = availableCommands.filter((cmd) =>
+      cmd.toLowerCase().startsWith(inputLower)
+    );
+
+    return matchingCommands;
+  };
+
+  // Get file system suggestions for commands like ls, cd, cat, etc.
+  const getFileSystemSuggestions = (command, args) => {
+    if (!args || args.length === 0) {
+      return [];
+    }
+
+    const lastArg = args[args.length - 1];
+    const currentDir = getCurrentDirectory();
+    const contents = currentDir.contents || {};
+
+    // Get all items in current directory that start with the last argument
+    const matchingItems = Object.keys(contents).filter((item) =>
+      item.toLowerCase().startsWith(lastArg.toLowerCase())
+    );
+
+    return matchingItems;
+  };
+
+  // Handle tab completion
+  const handleTabCompletion = () => {
+    const trimmedInput = currentInput.trim();
+    if (!trimmedInput) {
+      return;
+    }
+
+    const args = parseArguments(trimmedInput);
+    const command = args[0];
+    const cmdArgs = args.slice(1);
+
+    // If suggestions are already shown, navigate to next suggestion
+    if (showSuggestions && suggestions.length > 0) {
+      setSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+      return;
+    }
+
+    // If we have a command and arguments, try file system completion
+    if (command && cmdArgs.length > 0) {
+      const fileSystemCommands = ['ls', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
+      if (fileSystemCommands.includes(command.toLowerCase())) {
+        const fileSuggestions = getFileSystemSuggestions(command, cmdArgs);
+
+        if (fileSuggestions.length === 1) {
+          // Single file match - complete the filename
+          const newArgs = [...cmdArgs.slice(0, -1), fileSuggestions[0]];
+          setCurrentInput(`${command} ${newArgs.join(' ')} `);
+          setSuggestions([]);
+          setShowSuggestions(false);
+          setSuggestionIndex(-1);
+        } else if (fileSuggestions.length > 1) {
+          // Multiple file matches - show suggestions
+          setSuggestions(fileSuggestions);
+          setShowSuggestions(true);
+          setSuggestionIndex(0);
+        }
+        return;
+      }
+    }
+
+    // Default to command completion
+    const commandSuggestions = getSuggestions(trimmedInput);
+
+    if (commandSuggestions.length === 1) {
+      // Single match - complete the command
+      setCurrentInput(commandSuggestions[0] + ' ');
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
+    } else if (commandSuggestions.length > 1) {
+      // Multiple matches - show suggestions
+      setSuggestions(commandSuggestions);
+      setShowSuggestions(true);
+      setSuggestionIndex(0);
+    }
+  };
+
+  // Handle suggestion navigation
+  const handleSuggestionNavigation = (direction) => {
+    if (!showSuggestions || suggestions.length === 0) {
+      return;
+    }
+
+    setSuggestionIndex((prev) => {
+      if (direction === 'up') {
+        return prev <= 0 ? suggestions.length - 1 : prev - 1;
+      } else {
+        return prev >= suggestions.length - 1 ? 0 : prev + 1;
+      }
+    });
+  };
+
+  // Apply selected suggestion
+  const applySuggestion = () => {
+    if (suggestionIndex >= 0 && suggestionIndex < suggestions.length) {
+      const trimmedInput = currentInput.trim();
+      const args = parseArguments(trimmedInput);
+      const command = args[0];
+      const cmdArgs = args.slice(1);
+
+      // Check if this is a file system command with arguments
+      const fileSystemCommands = ['ls', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
+      if (command && cmdArgs.length > 0 && fileSystemCommands.includes(command.toLowerCase())) {
+        // Replace the last argument with the selected suggestion
+        const newArgs = [...cmdArgs.slice(0, -1), suggestions[suggestionIndex]];
+        setCurrentInput(`${command} ${newArgs.join(' ')} `);
+      } else {
+        // Regular command completion
+        setCurrentInput(suggestions[suggestionIndex] + ' ');
+      }
+
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
+
+      // Ensure focus returns to input after applying suggestion
+      setTimeout(() => {
+        if (inputRef.current && active) {
+          inputRef.current.focus();
+        }
+      }, 0);
+    }
+  };
+
   const handleLinkClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -341,6 +732,13 @@ const Console = ({ active, tabId, setActiveTab }) => {
         intervalRef.current = null;
         setIsTyping(false);
         setHistory([{ type: 'output', content: welcomeMessage, isHtml: true }]);
+
+        // Ensure focus returns to input after welcome animation completes
+        setTimeout(() => {
+          if (inputRef.current && active) {
+            inputRef.current.focus();
+          }
+        }, 0);
       }
     }, 20);
   };
@@ -366,6 +764,13 @@ const Console = ({ active, tabId, setActiveTab }) => {
         setIsOutputTypingHtml(false);
         setHistory((prev) => [...prev, { type: 'output', content: text, isHtml }]);
         setOutputTypingText('');
+
+        // Ensure focus returns to input after typing animation completes
+        setTimeout(() => {
+          if (inputRef.current && active) {
+            inputRef.current.focus();
+          }
+        }, 0);
       }
     }, speed);
   };
@@ -385,9 +790,11 @@ const Console = ({ active, tabId, setActiveTab }) => {
   - date: Show the current date and time
   - echo [text]: Print back the provided text
   - ascii [text]: Convert text to ASCII art
-  - matrix: Enter the matrix...
   - ip: Show your current IP address
   - hack: Simulate a hacking sequence
+  - alert [message]: Display an alert with the given message
+  - google [search_term]: Search Google for the given term
+  - bible: Get a random Bible verse
 
 
 💡 Tip: Click on the [PROFILE] and [PROJECTS] links in the welcome message to navigate between sections!`,
@@ -421,7 +828,7 @@ I specialize in modern web technologies and enjoy building things that make a di
   • Email: <a href="mailto:dedarritchon@uc.cl">dedarritchon@uc.cl</a>
   • LinkedIn: <a href="https://www.linkedin.com/in/dedarritchon/" target="_blank">linkedin.com/in/dedarritchon</a>
   • GitHub: <a href="https://github.com/dedarritchon" target="_blank">github.com/dedarritchon</a>
-  • Portfolio: <a href="https://dedarritchon.github.io" target="_blank">dedarritchon.github.io</a>`,
+  • Portfolio: <a href="https://dedarri.com" target="_blank">dedarri.com</a>`,
 
     clear: () => {
       setHistory([]);
@@ -441,17 +848,11 @@ I specialize in modern web technologies and enjoy building things that make a di
   📁 python-script/        - Data processing script
   📁 docker-project/       - Containerized application`,
 
-    whoami: () => `daniel.darritchon`,
+    whoami: () => `visitor`,
 
     date: () => new Date().toString(),
 
     echo: (args) => args.join(' '),
-
-    matrix: () => `Welcome to the Matrix...
-  You have taken the red pill.
-  The rabbit hole goes deeper than you think.
-  
-  Wake up, Neo...`,
 
     ip: async () => {
       try {
@@ -501,6 +902,7 @@ I specialize in modern web technologies and enjoy building things that make a di
       let currentCommand = 0;
       let commandChar = 0;
       let hackOutput = 'Starting hack sequence...\n';
+      let currentCommandOutput = '';
 
       const updateHackOutput = (newContent) => {
         hackOutput += newContent + '\n';
@@ -517,6 +919,21 @@ I specialize in modern web technologies and enjoy building things that make a di
         });
       };
 
+      const updateCommandOutput = (commandText) => {
+        currentCommandOutput = commandText;
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          const lastIndex = newHistory.length - 1;
+          if (lastIndex >= 0 && newHistory[lastIndex].type === 'hack-output') {
+            // Replace the last line with the current command being typed
+            const lines = hackOutput.split('\n');
+            lines[lines.length - 1] = `$ ${commandText}`;
+            newHistory[lastIndex] = { type: 'hack-output', content: lines.join('\n') };
+          }
+          return newHistory;
+        });
+      };
+
       const progressInterval = setInterval(() => {
         setHackProgress((prev) => {
           if (prev >= 100 && !hackCompleted) {
@@ -527,6 +944,13 @@ I specialize in modern web technologies and enjoy building things that make a di
             setTimeout(() => {
               alert('🎉 CONGRATULATIONS! You have successfully hacked the site! 🎉');
               setIsHacking(false);
+
+              // Ensure focus returns to input after hack sequence completes
+              setTimeout(() => {
+                if (inputRef.current && active) {
+                  inputRef.current.focus();
+                }
+              }, 0);
             }, 500);
             return 100;
           }
@@ -549,10 +973,11 @@ I specialize in modern web technologies and enjoy building things that make a di
           const command = hackCommands[currentCommand];
           if (commandChar < command.length) {
             const typedCommand = command.substring(0, commandChar + 1);
-            updateHackOutput(`$ ${typedCommand}`);
+            updateCommandOutput(typedCommand);
             commandChar++;
           } else {
             // Command fully typed, show execution
+            updateHackOutput(`$ ${command}`);
             setTimeout(() => {
               updateHackOutput(`[+] Command executed successfully`);
               updateHackOutput(`[+] Access granted to system ${currentCommand + 1}`);
@@ -573,6 +998,13 @@ I specialize in modern web technologies and enjoy building things that make a di
             updateHackOutput('');
             updateHackOutput('Welcome to the system, hacker.');
             setIsHacking(false);
+
+            // Ensure focus returns to input after hack sequence completes
+            setTimeout(() => {
+              if (inputRef.current && active) {
+                inputRef.current.focus();
+              }
+            }, 0);
           }, 1000);
         }
       }, 100);
@@ -660,11 +1092,23 @@ I specialize in modern web technologies and enjoy building things that make a di
       const fileName = args[0];
       const filePath = resolvePath(fileName);
 
-      if (!pathExists(filePath)) {
+      // Split the path to get the directory and filename
+      const pathParts = filePath.split('/').filter(Boolean);
+      const fileNameOnly = pathParts[pathParts.length - 1];
+      const directoryPath = '/' + pathParts.slice(0, -1).join('/');
+
+      // Get the parent directory
+      const parentDirectory = fileSystem[directoryPath];
+      if (!parentDirectory || parentDirectory.type !== 'directory') {
+        return `Error: Directory ${directoryPath} does not exist`;
+      }
+
+      // Check if the file exists in the directory contents
+      if (!parentDirectory.contents || !parentDirectory.contents[fileNameOnly]) {
         return `Error: File ${filePath} does not exist`;
       }
 
-      const file = fileSystem[filePath];
+      const file = parentDirectory.contents[fileNameOnly];
       if (file.type !== 'file') {
         return `Error: ${filePath} is not a file`;
       }
@@ -761,17 +1205,563 @@ I specialize in modern web technologies and enjoy building things that make a di
 
       return `Found ${results.length} result(s):\n${results.join('\n')}`;
     },
+
+    alert: (args) => {
+      if (args.length === 0) {
+        return 'Usage: alert [message]';
+      }
+
+      const message = args.join(' ');
+      alert(message);
+      return `Alert displayed: "${message}"`;
+    },
+
+    google: (args) => {
+      if (args.length === 0) {
+        return 'Usage: google [search_term]';
+      }
+
+      const searchTerm = args.join(' ');
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`;
+      window.open(searchUrl, '_blank', 'noopener,noreferrer');
+      return `Opening Google search for: "${searchTerm}"`;
+    },
+
+    bible: async () => {
+      try {
+        // Using the Bible API to get a random verse
+        const response = await fetch('https://labs.bible.org/api/?passage=random&formatting=plain');
+        const text = await response.text();
+
+        if (text && text.trim()) {
+          // Clean up the response and format it nicely
+          const cleanText = text.trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+          return ` Getting a random bible verse from <a href="https://labs.bible.org/api/?passage=random&formatting=plain">bible.org</a>:\n\n"${cleanText}"`;
+        } else {
+          return 'Unable to fetch Bible verse at this time. Please try again later.';
+        }
+      } catch (error) {
+        return 'Error fetching Bible verse. Please check your internet connection.';
+      }
+    },
+
+    ascii: (args) => {
+      if (args.length === 0) {
+        return 'Usage: ascii [text]\nExample: ascii Hello World';
+      }
+
+      const text = args.join(' ').toUpperCase();
+
+      // ASCII art font mapping (simple block letters)
+      const asciiFont = {
+        'A': [
+          '  A  ',
+          ' A A ',
+          'AAAAA',
+          'A   A',
+          'A   A'
+        ],
+        'B': [
+          'BBBB ',
+          'B   B',
+          'BBBB ',
+          'B   B',
+          'BBBB '
+        ],
+        'C': [
+          ' CCCC',
+          'C    ',
+          'C    ',
+          'C    ',
+          ' CCCC'
+        ],
+        'D': [
+          'DDDD ',
+          'D   D',
+          'D   D',
+          'D   D',
+          'DDDD '
+        ],
+        'E': [
+          'EEEEE',
+          'E    ',
+          'EEEE ',
+          'E    ',
+          'EEEEE'
+        ],
+        'F': [
+          'FFFFF',
+          'F    ',
+          'FFFF ',
+          'F    ',
+          'F    '
+        ],
+        'G': [
+          ' GGGG',
+          'G    ',
+          'G  GG',
+          'G   G',
+          ' GGGG'
+        ],
+        'H': [
+          'H   H',
+          'H   H',
+          'HHHHH',
+          'H   H',
+          'H   H'
+        ],
+        'I': [
+          'IIIII',
+          '  I  ',
+          '  I  ',
+          '  I  ',
+          'IIIII'
+        ],
+        'J': [
+          'JJJJJ',
+          '   J ',
+          '   J ',
+          'J  J ',
+          ' JJ  '
+        ],
+        'K': [
+          'K  K ',
+          'K K  ',
+          'KK   ',
+          'K K  ',
+          'K  K '
+        ],
+        'L': [
+          'L    ',
+          'L    ',
+          'L    ',
+          'L    ',
+          'LLLLL'
+        ],
+        'M': [
+          'M   M',
+          'MM MM',
+          'M M M',
+          'M   M',
+          'M   M'
+        ],
+        'N': [
+          'N   N',
+          'NN  N',
+          'N N N',
+          'N  NN',
+          'N   N'
+        ],
+        'O': [
+          ' OOO ',
+          'O   O',
+          'O   O',
+          'O   O',
+          ' OOO '
+        ],
+        'P': [
+          'PPPP ',
+          'P   P',
+          'PPPP ',
+          'P    ',
+          'P    '
+        ],
+        'Q': [
+          ' QQQ ',
+          'Q   Q',
+          'Q   Q',
+          'Q  Q ',
+          ' QQQQ'
+        ],
+        'R': [
+          'RRRR ',
+          'R   R',
+          'RRRR ',
+          'R R  ',
+          'R  R '
+        ],
+        'S': [
+          ' SSSS',
+          'S    ',
+          ' SSS ',
+          '    S',
+          'SSSS '
+        ],
+        'T': [
+          'TTTTT',
+          '  T  ',
+          '  T  ',
+          '  T  ',
+          '  T  '
+        ],
+        'U': [
+          'U   U',
+          'U   U',
+          'U   U',
+          'U   U',
+          ' UUU '
+        ],
+        'V': [
+          'V   V',
+          'V   V',
+          'V   V',
+          ' V V ',
+          '  V  '
+        ],
+        'W': [
+          'W   W',
+          'W   W',
+          'W W W',
+          'WW WW',
+          'W   W'
+        ],
+        'X': [
+          'X   X',
+          ' X X ',
+          '  X  ',
+          ' X X ',
+          'X   X'
+        ],
+        'Y': [
+          'Y   Y',
+          ' Y Y ',
+          '  Y  ',
+          '  Y  ',
+          '  Y  '
+        ],
+        'Z': [
+          'ZZZZZ',
+          '   Z ',
+          '  Z  ',
+          ' Z   ',
+          'ZZZZZ'
+        ],
+        ' ': [
+          '     ',
+          '     ',
+          '     ',
+          '     ',
+          '     '
+        ],
+        '0': [
+          ' 000 ',
+          '0   0',
+          '0   0',
+          '0   0',
+          ' 000 '
+        ],
+        '1': [
+          '  1  ',
+          ' 11  ',
+          '  1  ',
+          '  1  ',
+          ' 111 '
+        ],
+        '2': [
+          ' 222 ',
+          '2   2',
+          '   2 ',
+          '  2  ',
+          '22222'
+        ],
+        '3': [
+          ' 333 ',
+          '3   3',
+          '   3 ',
+          '3   3',
+          ' 333 '
+        ],
+        '4': [
+          '4   4',
+          '4   4',
+          '44444',
+          '    4',
+          '    4'
+        ],
+        '5': [
+          '55555',
+          '5    ',
+          '5555 ',
+          '    5',
+          '5555 '
+        ],
+        '6': [
+          ' 666 ',
+          '6    ',
+          '6666 ',
+          '6   6',
+          ' 666 '
+        ],
+        '7': [
+          '77777',
+          '    7',
+          '   7 ',
+          '  7  ',
+          ' 7   '
+        ],
+        '8': [
+          ' 888 ',
+          '8   8',
+          ' 888 ',
+          '8   8',
+          ' 888 '
+        ],
+        '9': [
+          ' 999 ',
+          '9   9',
+          ' 9999',
+          '    9',
+          ' 999 '
+        ],
+        '!': [
+          '  !  ',
+          '  !  ',
+          '  !  ',
+          '     ',
+          '  !  '
+        ],
+        '?': [
+          ' ??? ',
+          '?   ?',
+          '   ? ',
+          '     ',
+          '  ?  '
+        ],
+        '.': [
+          '     ',
+          '     ',
+          '     ',
+          '     ',
+          '  .  '
+        ],
+        ',': [
+          '     ',
+          '     ',
+          '     ',
+          '  ,  ',
+          ' ,   '
+        ],
+        '-': [
+          '     ',
+          '     ',
+          '-----',
+          '     ',
+          '     '
+        ],
+        '_': [
+          '     ',
+          '     ',
+          '     ',
+          '     ',
+          '_____'
+        ],
+        '+': [
+          '     ',
+          '  +  ',
+          ' +++ ',
+          '  +  ',
+          '     '
+        ],
+        '=': [
+          '     ',
+          '=====',
+          '     ',
+          '=====',
+          '     '
+        ],
+        '*': [
+          ' * * ',
+          '  *  ',
+          '*****',
+          '  *  ',
+          ' * * '
+        ],
+        '/': [
+          '    /',
+          '   / ',
+          '  /  ',
+          ' /   ',
+          '/    '
+        ],
+        '\\': [
+          '\\    ',
+          ' \\   ',
+          '  \\  ',
+          '   \\ ',
+          '    \\'
+        ],
+        '|': [
+          '  |  ',
+          '  |  ',
+          '  |  ',
+          '  |  ',
+          '  |  '
+        ],
+        '(': [
+          '  (  ',
+          ' (   ',
+          '(    ',
+          ' (   ',
+          '  (  '
+        ],
+        ')': [
+          '  )  ',
+          '   ) ',
+          '    )',
+          '   ) ',
+          '  )  '
+        ],
+        '[': [
+          '  [[ ',
+          '  [  ',
+          '  [  ',
+          '  [  ',
+          '  [[ '
+        ],
+        ']': [
+          ' ]]  ',
+          '  ]  ',
+          '  ]  ',
+          '  ]  ',
+          ' ]]  '
+        ],
+        '{': [
+          '  {{ ',
+          '  {  ',
+          ' {{  ',
+          '  {  ',
+          '  {{ '
+        ],
+        '}': [
+          ' }}  ',
+          '  }  ',
+          '  }} ',
+          '  }  ',
+          ' }}  '
+        ],
+        '<': [
+          '   < ',
+          '  <  ',
+          ' <   ',
+          '  <  ',
+          '   < '
+        ],
+        '>': [
+          ' >   ',
+          '  >  ',
+          '   > ',
+          '  >  ',
+          ' >   '
+        ],
+        '@': [
+          ' @@@ ',
+          '@   @',
+          '@ @@ ',
+          '@   @',
+          ' @@@ '
+        ],
+        '#': [
+          ' # # ',
+          '#####',
+          ' # # ',
+          '#####',
+          ' # # '
+        ],
+        '$': [
+          ' $$$$',
+          '$ $  ',
+          ' $$$ ',
+          '  $ $',
+          '$$$$ '
+        ],
+        '%': [
+          '%   %',
+          '   % ',
+          '  %  ',
+          ' %   ',
+          '%   %'
+        ],
+        '^': [
+          '  ^  ',
+          ' ^ ^ ',
+          '^   ^',
+          '     ',
+          '     '
+        ],
+        '&': [
+          ' &&  ',
+          '&  & ',
+          ' &&  ',
+          '&  & ',
+          ' && &'
+        ]
+      };
+
+      // Convert text to ASCII art
+      const lines = ['', '', '', '', ''];
+
+      for (let char of text) {
+        const asciiChar = asciiFont[char] || asciiFont['?'];
+        for (let i = 0; i < 5; i++) {
+          lines[i] += asciiChar[i] + ' ';
+        }
+      }
+
+      return lines.join('\n');
+    },
+  };
+
+  // Parse command arguments, handling quoted strings
+  const parseArguments = (input) => {
+    const args = [];
+    let current = '';
+    let inQuotes = false;
+    let quoteChar = '';
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+
+      if ((char === '"' || char === "'") && !inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+        continue;
+      }
+
+      if (char === quoteChar && inQuotes) {
+        inQuotes = false;
+        quoteChar = '';
+        continue;
+      }
+
+      if (char === ' ' && !inQuotes) {
+        if (current.trim()) {
+          args.push(current.trim());
+          current = '';
+        }
+        continue;
+      }
+
+      current += char;
+    }
+
+    if (current.trim()) {
+      args.push(current.trim());
+    }
+
+    return args;
   };
 
   const executeCommand = async (input) => {
     const trimmedInput = input.trim();
     if (!trimmedInput) {return null;}
 
-    const [command, ...args] = trimmedInput.split(' ');
+    const args = parseArguments(trimmedInput);
+    const command = args[0];
+    const cmdArgs = args.slice(1);
     const cmd = command.toLowerCase();
 
     if (commands[cmd]) {
-      const result = commands[cmd](args);
+      const result = commands[cmd](cmdArgs);
       return result;
     } else {
       return `Command not found: ${command}. Type 'help' for available commands.`;
@@ -809,9 +1799,11 @@ I specialize in modern web technologies and enjoy building things that make a di
 
         // Check if this is a file system command that should appear instantly
         const fileSystemCommands = ['ls', 'pwd', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
-        const isFileSystemCommand = fileSystemCommands.includes(currentInput);
+        const args = parseArguments(currentInput);
+        const command = args[0];
+        const isFileSystemCommand = fileSystemCommands.includes(command);
 
-        if (isFileSystemCommand) {
+        if (isFileSystemCommand || command === 'help') {
           // Add directly to history without typing animation
           setHistory((prev) => [...prev, { type: 'output', content, isHtml }]);
         } else {
@@ -823,19 +1815,33 @@ I specialize in modern web technologies and enjoy building things that make a di
 
     setCurrentInput('');
     setHistoryIndex(-1);
+
+    // Ensure focus returns to input after command execution
+    setTimeout(() => {
+      if (inputRef.current && active) {
+        inputRef.current.focus();
+      }
+    }, 0);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'ArrowUp') {
+    if (e.key === 'Tab') {
       e.preventDefault();
-      if (commandHistory.length > 0) {
+      handleTabCompletion();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (showSuggestions && suggestions.length > 0) {
+        handleSuggestionNavigation('up');
+      } else if (commandHistory.length > 0) {
         const newIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
         setHistoryIndex(newIndex);
         setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex]);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      if (historyIndex > 0) {
+      if (showSuggestions && suggestions.length > 0) {
+        handleSuggestionNavigation('down');
+      } else if (historyIndex > 0) {
         const newIndex = historyIndex - 1;
         setHistoryIndex(newIndex);
         setCurrentInput(commandHistory[commandHistory.length - 1 - newIndex]);
@@ -843,6 +1849,13 @@ I specialize in modern web technologies and enjoy building things that make a di
         setHistoryIndex(-1);
         setCurrentInput('');
       }
+    } else if (e.key === 'Enter' && showSuggestions) {
+      e.preventDefault();
+      applySuggestion();
+    } else if (e.key === 'Escape') {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
     }
   };
 
@@ -850,6 +1863,36 @@ I specialize in modern web technologies and enjoy building things that make a di
     if (active && inputRef.current) {
       inputRef.current.focus();
     }
+  }, [active]);
+
+  // Ensure cursor stays at command prompt after any interaction
+  useEffect(() => {
+    const handleClick = () => {
+      if (inputRef.current && active) {
+        inputRef.current.focus();
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (inputRef.current && active && document.activeElement !== inputRef.current) {
+        inputRef.current.focus();
+      }
+    };
+
+    if (active) {
+      document.addEventListener('click', handleClick);
+      document.addEventListener('keydown', handleKeyDown);
+
+      // Focus the input immediately
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [active]);
 
   useEffect(() => {
@@ -862,6 +1905,11 @@ I specialize in modern web technologies and enjoy building things that make a di
   useEffect(() => {
     if (active && !welcomeShown) {
       startWelcomeAnimation();
+    }
+
+    // Ensure focus when console becomes active
+    if (active && inputRef.current) {
+      inputRef.current.focus();
     }
   }, [active, welcomeShown]);
 
@@ -877,6 +1925,15 @@ I specialize in modern web technologies and enjoy building things that make a di
     };
   }, []);
 
+  // Clear suggestions when input changes
+  useEffect(() => {
+    if (showSuggestions) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
+    }
+  }, [currentInput]);
+
   if (!active) {return null;}
 
   return (
@@ -885,7 +1942,7 @@ I specialize in modern web technologies and enjoy building things that make a di
         <ConsoleDot color='#ff5f56' />
         <ConsoleDot color='#ffbd2e' />
         <ConsoleDot color='#27ca3f' />
-        <span>Terminal — daniel.darritchon</span>
+        <span>Terminal — visitor</span>
       </ConsoleHeader>
 
       {isTyping && (
@@ -902,8 +1959,8 @@ I specialize in modern web technologies and enjoy building things that make a di
         <div key={index}>
           {entry.type === 'input' && (
             <InputLine>
-              <Prompt>daniel@macbook-pro {entry.path || currentPath} $</Prompt>
-              <span>{entry.content}</span>
+              <Prompt>visitor@macbook-pro {entry.path || currentPath} $</Prompt>
+              <span style={{ color: '#888' }}>{entry.content}</span>
             </InputLine>
           )}
           {entry.type === 'output' && (
@@ -948,9 +2005,9 @@ I specialize in modern web technologies and enjoy building things that make a di
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
         <InputLine>
-          <Prompt>daniel@macbook-pro {currentPath} $</Prompt>
+          <Prompt>visitor@macbook-pro {currentPath} $</Prompt>
           <Input
             ref={inputRef}
             value={currentInput}
@@ -962,6 +2019,68 @@ I specialize in modern web technologies and enjoy building things that make a di
           />
           <Cursor>|</Cursor>
         </InputLine>
+
+        {showSuggestions && suggestions.length > 0 && (
+          <SuggestionsContainer>
+            {suggestions.map((suggestion, index) => {
+              const trimmedInput = currentInput.trim();
+              const args = parseArguments(trimmedInput);
+              const command = args[0];
+              const fileSystemCommands = ['ls', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
+              const isFileSystemCommand = command && fileSystemCommands.includes(command.toLowerCase());
+
+              // Get file type icon for file system suggestions
+              let displayText = suggestion;
+              if (isFileSystemCommand) {
+                const currentDir = getCurrentDirectory();
+                const contents = currentDir.contents || {};
+                const item = contents[suggestion];
+                const icon = item && item.type === 'directory' ? '📁' : '📄';
+                displayText = `${icon} ${suggestion}`;
+              }
+
+              return (
+                <SuggestionItem
+                  key={suggestion}
+                  isSelected={index === suggestionIndex}
+                  onClick={() => {
+                    const trimmedInput = currentInput.trim();
+                    const args = parseArguments(trimmedInput);
+                    const command = args[0];
+                    const cmdArgs = args.slice(1);
+
+                    // Check if this is a file system command with arguments
+                    const fileSystemCommands = ['ls', 'cd', 'cat', 'mkdir', 'touch', 'rm', 'find'];
+                    if (command && cmdArgs.length > 0 && fileSystemCommands.includes(command.toLowerCase())) {
+                      // Replace the last argument with the selected suggestion
+                      const newArgs = [...cmdArgs.slice(0, -1), suggestion];
+                      setCurrentInput(`${command} ${newArgs.join(' ')} `);
+                    } else {
+                      // Regular command completion
+                      setCurrentInput(suggestion + ' ');
+                    }
+
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                    setSuggestionIndex(-1);
+
+                    // Ensure focus returns to input after clicking suggestion
+                    setTimeout(() => {
+                      if (inputRef.current && active) {
+                        inputRef.current.focus();
+                      }
+                    }, 0);
+                  }}
+                >
+                  {displayText}
+                </SuggestionItem>
+              );
+            })}
+            <SuggestionHint>
+              Use ↑↓ or Tab to navigate, Enter to select, Esc to cancel
+            </SuggestionHint>
+          </SuggestionsContainer>
+        )}
       </form>
     </ConsoleContainer>
   );

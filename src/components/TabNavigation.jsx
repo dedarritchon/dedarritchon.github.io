@@ -19,6 +19,7 @@ const TabButton = styled.button`
   padding: 1rem 2rem;
   font-size: 1.2rem;
   font-family: 'Courier New', monospace;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
