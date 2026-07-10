@@ -2,239 +2,118 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { AppContext } from './../App/AppContext';
-import { Buttons } from './Buttons';
-import { Spotify } from './Spotify';
-// Remove the import since we'll use a relative path
+import { Section, Eyebrow, SectionTitle } from './shared';
+import { Reveal } from './Reveal';
 
-const ProfileContainer = styled.div`
-  display: ${({ active }) => active ? 'block' : 'none'};
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: left;
-  position: relative;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.55);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-`;
-
-const ProfileHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin-bottom: 3rem;
-  
-  @media only screen and (max-device-width: 820px) and (-webkit-min-device-pixel-ratio: 2) {
-    flex-direction: column;
-    text-align: center;
-  }
-`;
-
-const ProfileImage = styled.div`
-  width: 150px;
-  height: 150px;
-  border: 3px solid ${({ theme }) => theme.primaryTextColor};
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-  background: ${({ theme }) => theme.shadowColor};
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    pointer-events: none;
-  }
-  
-  @keyframes scan {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
-    position: relative;
-    z-index: 1;
-  }
-`;
-
-const ProfileInfo = styled.div`
-  flex: 1;
-`;
-
-const Name = styled.h1`
-  color: ${({ theme }) => theme.primaryTextColor};
-  font-size: 2.5rem;
-  margin: 0 0 0.5rem 0;
-  font-family: 'Courier New', monospace;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-`;
-
-const Title = styled.h2`
-  color: ${({ theme }) => theme.secondaryTextColor};
-  font-size: 1.5rem;
-  margin: 0 0 1rem 0;
-  font-family: 'Courier New', monospace;
-`;
-
-const Description = styled.p`
-  color: ${({ theme }) => theme.primaryTextColor};
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin: 0 0 2rem 0;
-  font-family: 'Courier New', monospace;
-`;
-
-const Section = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const SectionTitle = styled.h3`
-  color: ${({ theme }) => theme.primaryTextColor};
-  font-size: 1.3rem;
-  margin: 0 0 1rem 0;
-  font-family: 'Courier New', monospace;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 2px solid ${({ theme }) => theme.primaryTextColor};
-  padding-bottom: 0.5rem;
-`;
-
-const SkillsGrid = styled.div`
+const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-`;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 3rem;
+  align-items: start;
 
-const SkillItem = styled.div`
-  background: ${({ theme }) => theme.shadowColor};
-  border: 1px solid ${({ theme }) => theme.primaryTextColor};
-  padding: 1rem;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 0 15px ${({ theme }) => theme.primaryTextColor}40;
-    transform: translateY(-2px);
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 `;
 
-const SkillName = styled.div`
+const Bio = styled.p`
+  color: ${({ theme }) => theme.secondaryTextColor};
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin: 0 0 1.25rem 0;
+`;
+
+const SkillsPanel = styled.div`
+  background: ${({ theme }) => theme.surface};
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: 16px;
+  padding: 1.75rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+`;
+
+const PanelTitle = styled.h3`
   color: ${({ theme }) => theme.primaryTextColor};
-  font-weight: bold;
-  font-family: 'Courier New', monospace;
-  margin-bottom: 0.5rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 1.1rem 0;
 `;
 
-const SkillLevel = styled.div`
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: ${({ level }) => level}%;
-    background: linear-gradient(90deg, ${({ theme }) => theme.primaryTextColor}, ${({ theme }) => theme.secondaryTextColor});
-    animation: fillBar 1s ease-out;
-  }
-  
-  @keyframes fillBar {
-    from { width: 0%; }
-    to { width: ${({ level }) => level}%; }
-  }
-`;
-
-const ButtonsContainer = styled.div`
+const Badges = styled.div`
   display: flex;
-  justify-content: center;
-  margin: 2rem 0;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 `;
 
-const SpotifyContainer = styled.div`
-  margin-top: 2rem;
-  text-align: center;
-  height: 100%;
-  align-self: center;
-  justify-self: center;
+const Badge = styled.span`
+  color: ${({ theme }) => theme.secondaryTextColor};
+  background: ${({ theme }) => theme.surfaceHover};
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    color: ${({ theme }) => theme.primaryTextColor};
+    border-color: ${({ theme }) => theme.accent};
+  }
 `;
 
-export const Profile = ({ active, tabId }) => {
+export const Profile = () => {
   const { theme } = useContext(AppContext);
 
   const skills = [
-    { name: 'JavaScript/TypeScript', level: 80 },
-    { name: 'React', level: 85 },
-    { name: 'Node.js/Express', level: 80 },
-    { name: 'Python/Django', level: 90 },
-    { name: 'SQL/PostgreSQL', level: 85 },
-    { name: 'Git/GitHub', level: 90 },
-    { name: 'Docker/Kubernetes', level: 70 },
-    { name: 'GCP/AWS/Cloud Services', level: 80 }
+    'JavaScript / TypeScript',
+    'React',
+    'Node.js / Express',
+    'Python / Django',
+    'FastAPI / Flask',
+    'PostgreSQL / SQL',
+    'Docker / Kubernetes',
+    'GCP / AWS',
+    'Integraciones & APIs',
+    'Git / CI/CD',
   ];
 
   return (
-    <ProfileContainer active={active} theme={theme}>
-      <ProfileHeader theme={theme}>
-        <ProfileImage theme={theme}>
-          <img src='/images/profile.jpg' alt='Daniel Darritchon' />
-        </ProfileImage>
-        <ProfileInfo>
-          <Name theme={theme}>Daniel Darritchon</Name>
-          <Title theme={theme}>Software Engineer</Title>
-          <Description theme={theme}>
-            Passionate about creating innovative solutions and pushing the boundaries of technology.
-            I specialize in full-stack development with a focus on scalable, maintainable code.
-            When I'm not coding, you'll find me exploring new technologies or contributing to open-source projects.
-          </Description>
-        </ProfileInfo>
-      </ProfileHeader>
-
-      <ButtonsContainer>
-        <Buttons />
-      </ButtonsContainer>
-
-      <Section>
-        <SectionTitle theme={theme}>Technical Skills</SectionTitle>
-        <SkillsGrid>
-          {skills.map((skill, index) => (
-            <SkillItem key={index} theme={theme}>
-              <SkillName theme={theme}>{skill.name}</SkillName>
-              <SkillLevel level={skill.level} theme={theme} />
-            </SkillItem>
-          ))}
-        </SkillsGrid>
-      </Section>
-
-      <Section>
-        <SectionTitle theme={theme}>About Me</SectionTitle>
-        <Description theme={theme}>
-          I'm a software engineer with a passion for clean code and innovative solutions.
-          My journey in tech started with curiosity and has evolved into a career focused on
-          building robust, scalable applications. I believe in continuous learning and
-          staying up-to-date with the latest technologies and best practices.
-        </Description>
-      </Section>
-
-      <SpotifyContainer>
-        <Spotify />
-      </SpotifyContainer>
-    </ProfileContainer>
+    <Section id='sobre-mi'>
+      <Reveal>
+        <Eyebrow theme={theme}>Sobre mí</Eyebrow>
+        <SectionTitle theme={theme}>Ingeniería con foco en resultados</SectionTitle>
+      </Reveal>
+      <Reveal delay={80}>
+        <Grid>
+          <div>
+            <Bio theme={theme}>
+              Soy Daniel Darritchon, ingeniero de software con más de cinco años
+              construyendo aplicaciones web full-stack, integraciones y automatizaciones
+              para empresas. Me especializo en transformar necesidades de negocio en
+              productos escalables, mantenibles y confiables.
+            </Bio>
+            <Bio theme={theme}>
+              He trabajado desde startups hasta plataformas en producción usadas a
+              diario, cubriendo el ciclo completo: arquitectura, desarrollo, despliegue
+              en la nube y mantenimiento. Creo en el código limpio, la comunicación clara
+              y en entregar valor real, no solo funcionalidades.
+            </Bio>
+            <Bio theme={theme}>
+              Hoy combino ese recorrido técnico con consultoría, ayudando a clientes a
+              tomar mejores decisiones tecnológicas y a llevar sus ideas a la práctica.
+            </Bio>
+          </div>
+          <SkillsPanel theme={theme}>
+            <PanelTitle theme={theme}>Stack &amp; herramientas</PanelTitle>
+            <Badges>
+              {skills.map((skill) => (
+                <Badge key={skill} theme={theme}>{skill}</Badge>
+              ))}
+            </Badges>
+          </SkillsPanel>
+        </Grid>
+      </Reveal>
+    </Section>
   );
 };
