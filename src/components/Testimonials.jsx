@@ -10,15 +10,15 @@ const TESTIMONIALS = [
   {
     quote:
       'Daniel entendió nuestro problema desde el primer día y entregó una solución sólida y a tiempo. Su capacidad técnica y su comunicación clara marcaron la diferencia en el proyecto.',
-    name: 'Nombre Apellido',
-    role: 'Cargo, Empresa',
+    name: 'Dr. Carlos Uc',
+    role: 'Médico Pediatra',
     avatar: '',
   },
   {
     quote:
       'Trabajar con Daniel fue muy fácil. Automatizó procesos que antes nos tomaban horas y el resultado superó nuestras expectativas. Sin duda volveríamos a contar con él.',
-    name: 'Nombre Apellido',
-    role: 'Cargo, Empresa',
+    name: 'Aldo Novion',
+    role: 'Fundador, Accountability.cl',
     avatar: '',
   },
 ];
