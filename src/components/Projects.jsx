@@ -179,6 +179,17 @@ const WorkCompany = styled.span`
   color: ${({ theme }) => theme.accent};
   font-size: 1rem;
   font-weight: 600;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+
+  a:hover {
+    border-bottom-color: currentColor;
+  }
 `;
 
 const WorkDuration = styled.span`
@@ -262,7 +273,16 @@ export const Projects = () => {
               <WorkItem theme={theme}>
                 <WorkHeader>
                   <WorkTitle theme={theme}>{work.title}</WorkTitle>
-                  <WorkCompany theme={theme}>· {work.company}</WorkCompany>
+                  <WorkCompany theme={theme}>
+                    {'· '}
+                    {work.link ? (
+                      <a href={work.link} target='_blank' rel='noreferrer'>
+                        {work.company}
+                      </a>
+                    ) : (
+                      work.company
+                    )}
+                  </WorkCompany>
                   <WorkDuration theme={theme}>{work.duration}</WorkDuration>
                 </WorkHeader>
                 <WorkDescription theme={theme}>{work.description}</WorkDescription>

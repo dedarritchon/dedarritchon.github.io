@@ -12,14 +12,28 @@ const TESTIMONIALS = [
       'Daniel entendió nuestro problema desde el primer día y entregó una solución sólida y a tiempo. Su capacidad técnica y su comunicación clara marcaron la diferencia en el proyecto.',
     name: 'Dr. Carlos Uc',
     role: 'Médico Pediatra',
-    avatar: '',
+    avatar: '/images/avatars/dr-carlos-uc-pediatra.png',
   },
   {
     quote:
       'Trabajar con Daniel fue muy fácil. Automatizó procesos que antes nos tomaban horas y el resultado superó nuestras expectativas. Sin duda volveríamos a contar con él.',
     name: 'Aldo Novion',
     role: 'Fundador, Accountability.cl',
-    avatar: '',
+    avatar: '/images/avatars/accountability-logo.jpg',
+  },
+  {
+    quote:
+      'Daniel fue clave para llevar a Adereso al siguiente nivel. Lideró proyectos técnicos complejos con criterio y responsabilidad, y siempre elevó el estándar del equipo. Un profesional de primer nivel.',
+    name: 'Camilo López',
+    role: 'CEO, Adereso',
+    avatar: '/images/avatars/adereso-logo.png',
+  },
+  {
+    quote:
+      'Daniel es un ingeniero excepcional. Diseñó y construyó integraciones críticas con gran autonomía y una calidad impecable. Su compromiso y colaboración lo hacen destacar en cualquier equipo.',
+    name: 'José Ossa',
+    role: 'Engineering Manager, Front',
+    avatar: '/images/avatars/front-logo.png',
   },
 ];
 

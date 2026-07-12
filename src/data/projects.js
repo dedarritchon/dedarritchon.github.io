@@ -71,6 +71,22 @@ export const projects = [
     ],
   },
   {
+    id: 'comparto-depto',
+    title: 'Mensajes Masivos Comparto Depto',
+    summary:
+      'Extensión de navegador que añade el envío de mensajes masivos a Comparto Depto, permitiendo contactar a varias personas de forma fácil y rápida.',
+    description:
+      'Comparto Depto no cuenta con una forma de enviar mensajes masivos. Este plugin de navegador agrega esa funcionalidad, permitiendo contactar a varias personas de forma fácil y automática, ahorrando tiempo en la búsqueda y comunicación con potenciales compañeros de departamento.',
+    tech: ['JavaScript', 'Browser Extension', 'Chrome Web Store'],
+    liveLink: 'https://chromewebstore.google.com/detail/mensajes-autom%C3%A1ticos-en-c/cancfdhcdlhclhkkhbnpcmibgdpfabel',
+    githubLink: 'https://github.com/dedarritchon/autoSendMessagesOnCompartoDepto',
+    cover: '/images/projects/comparto-depto/chrome-plugin.jpg',
+    gallery: [
+      { src: '/images/projects/comparto-depto/chrome-plugin.jpg', caption: 'Extensión de Chrome en acción' },
+      { src: '/images/projects/comparto-depto/appstore-page.png', caption: 'Página en la Chrome Web Store' },
+    ],
+  },
+  {
     id: 'spotify',
     title: 'Front Spotify Plugin',
     summary:
@@ -79,7 +95,7 @@ export const projects = [
       'Extensión de navegador para controlar la reproducción de Spotify sin cambiar de pestaña en Front. Mejora la productividad integrando el control de música directamente en la interfaz. Aprobada por Spotify Developers.',
     tech: ['JavaScript', 'Browser Extension', 'Spotify Web API', 'Front'],
     liveLink: 'https://front.com/integrations?search=spotify&category=all',
-    githubLink: null,
+    githubLink: 'https://github.com/dedarritchon/front-spotify',
     cover: '/images/spotify.png',
     gallery: [
       { src: '/images/spotify.png', caption: 'Control de reproducción integrado' },
@@ -104,17 +120,27 @@ export const projects = [
 
 export const workExperience = [
   {
+    title: 'Profesor Instructor Adjunto',
+    company: 'Pontificia Universidad Católica de Chile',
+    duration: 'Desde 2022',
+    description:
+      'Docente del curso IIC3103 Taller de Integración, especializado en integración de software: APIs, servicios, eventos, integración por datos y seguridad en la integración, con un enfoque práctico orientado a problemas reales de la industria.',
+    link: 'https://www.ing.uc.cl/academicos-e-investigadores/daniel-eduardo-darritchon-lama/',
+  },
+  {
     title: 'Senior Software Engineer',
     company: 'Front',
     duration: '2 años',
     description:
-      'Lideré el desarrollo de soluciones e integraciones innovadoras, incluyendo el Front Spotify Plugin, que mejora la productividad de los usuarios integrando el control de música dentro de Front.',
+      'Diseñé, desarrollé y mantuve integraciones clave con partners de la empresa, construyendo frameworks y documentación amigables para desarrolladores. Participé en la estrategia de integraciones y colaboré con product managers, diseñadores e ingenieros para conceptualizar, construir y probar nuevas funcionalidades.',
+    link: 'https://front.com/',
   },
   {
     title: 'Software Engineer',
     company: 'Adereso',
     duration: '4 años',
     description:
-      'Desarrollé y mantuve diversas aplicaciones de software, contribuyendo a las iniciativas de transformación digital y a la mejora de la infraestructura técnica de la empresa.',
+      'Creé y mantuve servicios web escalables de punta a punta y lideré el desarrollo de Adereso BSP, habilitando a Adereso como Whatsapp Business Partner. Además, brindé liderazgo técnico y mentoría a otros desarrolladores del equipo.',
+    link: 'https://adereso.ai/',
   },
 ];
