@@ -7,9 +7,33 @@ const LocomotiveContext = createContext({
   stop: () => {},
   start: () => {},
   update: () => {},
+  subscribeScroll: () => () => {},
 });
 
 export const useLocomotive = () => useContext(LocomotiveContext);
+
+// Devuelve un handler de click para anclas internas (#seccion) que usa el
+// scrollTo de Locomotive. Es imprescindible: con smooth scroll el contenedor
+// está transformado, por lo que el salto nativo del navegador (href="#x")
+// se rompe y no muestra la sección. Con fallback a scrollIntoView.
+export const useAnchorScroll = (offset = -80) => {
+  const { scrollTo } = useLocomotive();
+
+  return (e, href) => {
+    const selector = href || (e.currentTarget && e.currentTarget.getAttribute('href'));
+    if (!selector || selector[0] !== '#') {return;}
+
+    const target = document.querySelector(selector);
+    if (!target) {return;}
+
+    e.preventDefault();
+    if (scrollTo) {
+      scrollTo(target, { offset });
+    } else {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+};
 
 // Provider de scroll suave con Locomotive Scroll (v4).
 // - El header (navbar) se renderiza FUERA del contenedor porque es position: fixed.
@@ -17,6 +41,7 @@ export const useLocomotive = () => useContext(LocomotiveContext);
 export const SmoothScrollProvider = ({ header, children }) => {
   const containerRef = useRef(null);
   const instanceRef = useRef(null);
+  const scrollListenersRef = useRef(new Set());
 
   useEffect(() => {
     const el = containerRef.current;
@@ -32,14 +57,13 @@ export const SmoothScrollProvider = ({ header, children }) => {
       getDirection: true,
       class: 'is-inview',
       tablet: { smooth: true, breakpoint: 1024 },
-      smartphone: { smooth: false },
+      smartphone: { smooth: true },
     });
     instanceRef.current = instance;
 
-    // Reenvía la posición de scroll para que otros componentes (navbar) reaccionen,
-    // ya que con smooth scroll window.scrollY se mantiene en 0.
     instance.on('scroll', (obj) => {
       const y = obj && obj.scroll ? obj.scroll.y : 0;
+      scrollListenersRef.current.forEach((fn) => fn(y));
       window.dispatchEvent(new CustomEvent('locomotive-scroll', { detail: { y } }));
     });
 
@@ -64,6 +88,10 @@ export const SmoothScrollProvider = ({ header, children }) => {
     stop: () => instanceRef.current && instanceRef.current.stop(),
     start: () => instanceRef.current && instanceRef.current.start(),
     update: () => instanceRef.current && instanceRef.current.update(),
+    subscribeScroll: (fn) => {
+      scrollListenersRef.current.add(fn);
+      return () => scrollListenersRef.current.delete(fn);
+    },
   };
 
   return (

@@ -76,22 +76,21 @@ const WhatsAppIcon = () => (
 );
 
 export const Contact = () => {
-  const { theme } = useContext(AppContext);
+  const { theme, t } = useContext(AppContext);
+  const c = t.contact;
 
   return (
     <Section id='contacto'>
       <Panel theme={theme}>
-        <Eyebrow theme={theme}>Contacto</Eyebrow>
-        <SectionTitle theme={theme}>¿Tienes un proyecto en mente?</SectionTitle>
-        <SectionIntro theme={theme} style={{ margin: '0 auto 0' }}>
-          Cuéntame qué necesitas y agendemos una conversación. Respondo dentro de 24 horas.
-        </SectionIntro>
+        <Eyebrow theme={theme}>{c.eyebrow}</Eyebrow>
+        <SectionTitle theme={theme}>{c.title}</SectionTitle>
+        <SectionIntro theme={theme} style={{ margin: '0 auto 0' }}>{c.intro}</SectionIntro>
         <Actions>
           <ContactButton href={`mailto:${EMAIL}`} theme={theme} primary>
-            <MailIcon /> Escríbeme
+            <MailIcon /> {c.email}
           </ContactButton>
           <ContactButton href={WHATSAPP_URL} target='_blank' rel='noopener noreferrer' theme={theme}>
-            <WhatsAppIcon /> WhatsApp
+            <WhatsAppIcon /> {c.whatsapp}
           </ContactButton>
         </Actions>
       </Panel>

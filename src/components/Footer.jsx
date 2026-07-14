@@ -58,23 +58,23 @@ const SocialLink = styled.a`
   }
 `;
 
-const SOCIALS = [
-  { href: 'https://github.com/dedarritchon', label: 'GitHub', icon: <GitHub /> },
-  { href: 'https://www.linkedin.com/in/dedarritchon/', label: 'LinkedIn', icon: <LinkedIn /> },
-  { href: 'https://drive.google.com/file/d/1ASG5JTR_lZI1b3scN3kKAgulgOTe4uNh/view?usp=sharing', label: 'Currículum', icon: <Resume /> },
-  { href: 'mailto:dedarritchon@uc.cl', label: 'Email', icon: <Email /> },
-];
-
 export const Footer = () => {
-  const { theme } = useContext(AppContext);
+  const { theme, t } = useContext(AppContext);
   const year = new Date().getFullYear();
+
+  const socials = [
+    { href: 'https://github.com/dedarritchon', label: 'GitHub', icon: <GitHub /> },
+    { href: 'https://www.linkedin.com/in/dedarritchon/', label: 'LinkedIn', icon: <LinkedIn /> },
+    { href: 'https://drive.google.com/file/d/1ASG5JTR_lZI1b3scN3kKAgulgOTe4uNh/view?usp=sharing', label: t.footer.resume, icon: <Resume /> },
+    { href: 'mailto:dedarritchon@uc.cl', label: 'Email', icon: <Email /> },
+  ];
 
   return (
     <Wrapper theme={theme}>
       <Inner>
-        <Copy theme={theme}>© {year} Daniel Darritchon · Ingeniero de Software &amp; Consultor</Copy>
+        <Copy theme={theme}>© {year} Daniel Darritchon · {t.footer.copy}</Copy>
         <Socials>
-          {SOCIALS.map(({ href, label, icon }) => (
+          {socials.map(({ href, label, icon }) => (
             <SocialLink
               key={label}
               href={href}

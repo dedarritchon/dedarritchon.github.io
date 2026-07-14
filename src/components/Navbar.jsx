@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AppContext } from './../App/AppContext';
-import { useLocomotive } from './../hooks/useLocomotive';
+import { useAnchorScroll } from './../hooks/useLocomotive';
 
 const Bar = styled.header`
   position: fixed;
@@ -92,6 +92,52 @@ const Cta = styled.a`
   }
 `;
 
+const RightGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+// Prominent, always-visible language switch so first-time visitors can
+// immediately swap between Spanish and English.
+const LangSwitch = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.surface};
+  border: 1px solid ${({ theme }) => theme.accent};
+  box-shadow: 0 0 0 3px ${({ theme }) => `${theme.accent}22`};
+`;
+
+const Globe = styled.svg`
+  width: 16px;
+  height: 16px;
+  margin-left: 0.35rem;
+  color: ${({ theme }) => theme.accent};
+  flex: 0 0 auto;
+`;
+
+const LangButton = styled.button`
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  transition: background 0.2s ease, color 0.2s ease;
+  color: ${({ active, theme }) => (active ? '#fff' : theme.secondaryTextColor)};
+  background: ${({ active, theme }) => (active ? theme.cta : 'transparent')};
+
+  &:hover {
+    color: ${({ active, theme }) => (active ? '#fff' : theme.primaryTextColor)};
+  }
+`;
+
 const MenuButton = styled.button`
   display: none;
   background: transparent;
@@ -142,17 +188,17 @@ const MobileLink = styled.a`
   }
 `;
 
-const LINKS = [
-  { href: '#sobre-mi', label: 'Sobre mí' },
-  { href: '#servicios', label: 'Servicios' },
-  { href: '#proyectos', label: 'Proyectos' },
-  { href: '#experiencia', label: 'Experiencia' },
-  { href: '#valoraciones', label: 'Valoraciones' },
-];
+const GlobeIcon = ({ theme }) => (
+  <Globe theme={theme} viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+    <circle cx='12' cy='12' r='10' />
+    <path d='M2 12h20' />
+    <path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z' />
+  </Globe>
+);
 
 export const Navbar = () => {
-  const { theme } = useContext(AppContext);
-  const { scrollTo } = useLocomotive();
+  const { theme, lang, setLang, t } = useContext(AppContext);
+  const anchorScroll = useAnchorScroll();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -169,13 +215,31 @@ export const Navbar = () => {
   }, []);
 
   const handleNav = (e, href) => {
-    const target = document.querySelector(href);
-    if (target) {
-      e.preventDefault();
-      scrollTo(target, { offset: -80 });
-      setOpen(false);
-    }
+    anchorScroll(e, href);
+    setOpen(false);
   };
+
+  const langSwitch = (
+    <LangSwitch theme={theme} role='group' aria-label={t.langSwitch.label}>
+      <GlobeIcon theme={theme} />
+      <LangButton
+        theme={theme}
+        active={lang === 'es'}
+        aria-pressed={lang === 'es'}
+        onClick={() => setLang('es')}
+      >
+        ES
+      </LangButton>
+      <LangButton
+        theme={theme}
+        active={lang === 'en'}
+        aria-pressed={lang === 'en'}
+        onClick={() => setLang('en')}
+      >
+        EN
+      </LangButton>
+    </LangSwitch>
+  );
 
   return (
     <>
@@ -185,31 +249,34 @@ export const Navbar = () => {
           Daniel<span>.</span>Darritchon
         </Brand>
         <Links theme={theme}>
-          {LINKS.map((l) => (
+          {t.nav.links.map((l) => (
             <NavLink key={l.href} href={l.href} theme={theme} onClick={(e) => handleNav(e, l.href)}>
               {l.label}
             </NavLink>
           ))}
-          <Cta href='#contacto' theme={theme} onClick={(e) => handleNav(e, '#contacto')}>Agendar consultoría</Cta>
+          <Cta href='#contacto' theme={theme} onClick={(e) => handleNav(e, '#contacto')}>{t.nav.cta}</Cta>
         </Links>
-        <MenuButton theme={theme} aria-label='Abrir menú' onClick={() => setOpen((o) => !o)}>
-          <svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round'>
-            {open ? (
-              <><line x1='18' y1='6' x2='6' y2='18' /><line x1='6' y1='6' x2='18' y2='18' /></>
-            ) : (
-              <><line x1='3' y1='6' x2='21' y2='6' /><line x1='3' y1='12' x2='21' y2='12' /><line x1='3' y1='18' x2='21' y2='18' /></>
-            )}
-          </svg>
-        </MenuButton>
+        <RightGroup>
+          {langSwitch}
+          <MenuButton theme={theme} aria-label={t.nav.openMenu} onClick={() => setOpen((o) => !o)}>
+            <svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round'>
+              {open ? (
+                <><line x1='18' y1='6' x2='6' y2='18' /><line x1='6' y1='6' x2='18' y2='18' /></>
+              ) : (
+                <><line x1='3' y1='6' x2='21' y2='6' /><line x1='3' y1='12' x2='21' y2='12' /><line x1='3' y1='18' x2='21' y2='18' /></>
+              )}
+            </svg>
+          </MenuButton>
+        </RightGroup>
       </Bar>
       <MobileMenu open={open} theme={theme}>
-        {LINKS.map((l) => (
+        {t.nav.links.map((l) => (
           <MobileLink key={l.href} href={l.href} theme={theme} onClick={(e) => handleNav(e, l.href)}>
             {l.label}
           </MobileLink>
         ))}
         <MobileLink href='#contacto' theme={theme} onClick={(e) => handleNav(e, '#contacto')}>
-          Agendar consultoría
+          {t.nav.cta}
         </MobileLink>
       </MobileMenu>
     </>

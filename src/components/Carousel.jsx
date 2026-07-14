@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AppContext } from './../App/AppContext';
+import { pick } from './../data/projects';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -111,8 +112,9 @@ const ArrowIcon = ({ dir }) => (
 );
 
 export const Carousel = ({ images = [] }) => {
-  const { theme } = useContext(AppContext);
+  const { theme, lang } = useContext(AppContext);
   const [index, setIndex] = useState(0);
+  const caption = (img, fallback) => pick(img.caption, lang) || fallback;
   const count = images.length;
   const hasMultiple = count > 1;
 
@@ -141,7 +143,7 @@ export const Carousel = ({ images = [] }) => {
     <Wrapper>
       <Stage theme={theme}>
         {images.map((img, i) => (
-          <Slide key={img.src + i} src={img.src} alt={img.caption || `Imagen ${i + 1}`} active={i === index} />
+          <Slide key={img.src + i} src={img.src} alt={caption(img, `Imagen ${i + 1}`)} active={i === index} />
         ))}
         <Arrow theme={theme} side='left' visible={hasMultiple} aria-label='Imagen anterior' onClick={() => go(index - 1)}>
           <ArrowIcon dir='left' />
@@ -152,7 +154,7 @@ export const Carousel = ({ images = [] }) => {
         {hasMultiple && <Counter theme={theme}>{index + 1} / {count}</Counter>}
       </Stage>
 
-      <Caption theme={theme}>{images[index].caption}</Caption>
+      <Caption theme={theme}>{caption(images[index], '')}</Caption>
 
       {hasMultiple && (
         <Thumbs>
@@ -164,7 +166,7 @@ export const Carousel = ({ images = [] }) => {
               aria-label={`Ir a imagen ${i + 1}`}
               onClick={() => setIndex(i)}
             >
-              <img src={img.src} alt={img.caption || `Miniatura ${i + 1}`} />
+              <img src={img.src} alt={caption(img, `Miniatura ${i + 1}`)} />
             </Thumb>
           ))}
         </Thumbs>

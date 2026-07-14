@@ -63,51 +63,26 @@ const Badge = styled.span`
 `;
 
 export const Profile = () => {
-  const { theme } = useContext(AppContext);
-
-  const skills = [
-    'JavaScript / TypeScript',
-    'React',
-    'Node.js / Express',
-    'Python / Django',
-    'FastAPI / Flask',
-    'PostgreSQL / SQL',
-    'Docker / Kubernetes',
-    'GCP / AWS',
-    'Integraciones & APIs',
-    'Git / CI/CD',
-  ];
+  const { theme, t } = useContext(AppContext);
+  const p = t.profile;
 
   return (
     <Section id='sobre-mi'>
       <Reveal>
-        <Eyebrow theme={theme}>Sobre mí</Eyebrow>
-        <SectionTitle theme={theme}>Ingeniería con foco en resultados</SectionTitle>
+        <Eyebrow theme={theme}>{p.eyebrow}</Eyebrow>
+        <SectionTitle theme={theme}>{p.title}</SectionTitle>
       </Reveal>
       <Reveal delay={80}>
         <Grid>
           <div>
-            <Bio theme={theme}>
-              Soy Daniel Darritchon, ingeniero de software con más de cinco años
-              construyendo aplicaciones web full-stack, integraciones y automatizaciones
-              para empresas. Me especializo en transformar necesidades de negocio en
-              productos escalables, mantenibles y confiables.
-            </Bio>
-            <Bio theme={theme}>
-              He trabajado desde startups hasta plataformas en producción usadas a
-              diario, cubriendo el ciclo completo: arquitectura, desarrollo, despliegue
-              en la nube y mantenimiento. Creo en el código limpio, la comunicación clara
-              y en entregar valor real, no solo funcionalidades.
-            </Bio>
-            <Bio theme={theme}>
-              Hoy combino ese recorrido técnico con consultoría, ayudando a clientes a
-              tomar mejores decisiones tecnológicas y a llevar sus ideas a la práctica.
-            </Bio>
+            {p.bio.map((paragraph, i) => (
+              <Bio key={i} theme={theme}>{paragraph}</Bio>
+            ))}
           </div>
           <SkillsPanel theme={theme}>
-            <PanelTitle theme={theme}>Stack &amp; herramientas</PanelTitle>
+            <PanelTitle theme={theme}>{p.panelTitle}</PanelTitle>
             <Badges>
-              {skills.map((skill) => (
+              {p.skills.map((skill) => (
                 <Badge key={skill} theme={theme}>{skill}</Badge>
               ))}
             </Badges>

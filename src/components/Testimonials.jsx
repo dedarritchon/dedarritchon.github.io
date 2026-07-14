@@ -5,36 +5,12 @@ import { AppContext } from './../App/AppContext';
 import { Section, Eyebrow, SectionTitle, SectionIntro, Orb } from './shared';
 import { Reveal } from './Reveal';
 
-// Valoraciones de clientes. Reemplaza estos datos de ejemplo por reseñas reales.
+// Valoraciones de clientes. Los textos (quote/role) viven en `data/i18n.js`.
 const TESTIMONIALS = [
-  {
-    quote:
-      'Daniel entendió nuestro problema desde el primer día y entregó una solución sólida y a tiempo. Su capacidad técnica y su comunicación clara marcaron la diferencia en el proyecto.',
-    name: 'Dr. Carlos Uc',
-    role: 'Médico Pediatra',
-    avatar: '/images/avatars/dr-carlos-uc-pediatra.png',
-  },
-  {
-    quote:
-      'Trabajar con Daniel fue muy fácil. Automatizó procesos que antes nos tomaban horas y el resultado superó nuestras expectativas. Sin duda volveríamos a contar con él.',
-    name: 'Aldo Novion',
-    role: 'Fundador, Accountability.cl',
-    avatar: '/images/avatars/accountability-logo.jpg',
-  },
-  {
-    quote:
-      'Daniel fue clave para llevar a Adereso al siguiente nivel. Lideró proyectos técnicos complejos con criterio y responsabilidad, y siempre elevó el estándar del equipo. Un profesional de primer nivel.',
-    name: 'Camilo López',
-    role: 'CEO, Adereso',
-    avatar: '/images/avatars/adereso-logo.png',
-  },
-  {
-    quote:
-      'Daniel es un ingeniero excepcional. Diseñó y construyó integraciones críticas con gran autonomía y una calidad impecable. Su compromiso y colaboración lo hacen destacar en cualquier equipo.',
-    name: 'José Ossa',
-    role: 'Engineering Manager, Front',
-    avatar: '/images/avatars/front-logo.png',
-  },
+  { name: 'Dr. Carlos Uc', avatar: '/images/avatars/dr-carlos-uc-pediatra.png' },
+  { name: 'Aldo Novion', avatar: '/images/avatars/accountability-logo.jpg' },
+  { name: 'Camilo López', avatar: '/images/avatars/adereso-logo.png' },
+  { name: 'José Ossa', avatar: '/images/avatars/front-logo.png' },
 ];
 
 const Grid = styled.div`
@@ -141,7 +117,8 @@ const initials = (name) =>
     .toUpperCase();
 
 export const Testimonials = () => {
-  const { theme } = useContext(AppContext);
+  const { theme, t } = useContext(AppContext);
+  const tt = t.testimonials;
 
   return (
     <Section id='valoraciones'>
@@ -153,30 +130,28 @@ export const Testimonials = () => {
         style={{ width: '400px', height: '400px', bottom: '-60px', right: '-120px' }}
       />
       <Reveal>
-        <Eyebrow theme={theme}>Testimonios</Eyebrow>
-        <SectionTitle theme={theme}>Lo que dicen mis clientes</SectionTitle>
-        <SectionIntro theme={theme}>
-          Valoraciones de personas y equipos con los que he trabajado.
-        </SectionIntro>
+        <Eyebrow theme={theme}>{tt.eyebrow}</Eyebrow>
+        <SectionTitle theme={theme}>{tt.title}</SectionTitle>
+        <SectionIntro theme={theme}>{tt.intro}</SectionIntro>
       </Reveal>
       <Grid>
-        {TESTIMONIALS.map((t, i) => (
+        {TESTIMONIALS.map((person, i) => (
           <Reveal key={i} from='up' delay={i * 90}>
             <Quote theme={theme}>
               <QuoteMark theme={theme}>&ldquo;</QuoteMark>
-              <Stars aria-label='5 de 5 estrellas'>
+              <Stars aria-label={tt.starsLabel}>
                 {Array.from({ length: 5 }).map((_, s) => (
                   <StarIcon key={s} />
                 ))}
               </Stars>
-              <Text theme={theme}>{t.quote}</Text>
+              <Text theme={theme}>{tt.quotes[person.name]}</Text>
               <Person>
                 <Avatar theme={theme}>
-                  {t.avatar ? <img src={t.avatar} alt={t.name} /> : initials(t.name)}
+                  {person.avatar ? <img src={person.avatar} alt={person.name} /> : initials(person.name)}
                 </Avatar>
                 <div>
-                  <Name theme={theme}>{t.name}</Name>
-                  <Role theme={theme}>{t.role}</Role>
+                  <Name theme={theme}>{person.name}</Name>
+                  <Role theme={theme}>{tt.roles[person.name]}</Role>
                 </div>
               </Person>
             </Quote>

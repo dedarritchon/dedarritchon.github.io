@@ -5,6 +5,7 @@ import styled, { keyframes } from 'styled-components';
 import { AppContext } from './../App/AppContext';
 import { useLocomotive } from './../hooks/useLocomotive';
 import { Carousel } from './Carousel';
+import { pick } from './../data/projects';
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -131,7 +132,7 @@ const LinkButton = styled.a`
 `;
 
 export const ProjectModal = ({ project, onClose }) => {
-  const { theme } = useContext(AppContext);
+  const { theme, lang, t } = useContext(AppContext);
   const { stop, start } = useLocomotive();
 
   useEffect(() => {
@@ -152,7 +153,7 @@ export const ProjectModal = ({ project, onClose }) => {
   return createPortal(
     <Overlay onClick={onClose}>
       <Panel theme={theme} role='dialog' aria-modal='true' aria-label={project.title} onClick={(e) => e.stopPropagation()}>
-        <CloseButton theme={theme} aria-label='Cerrar' onClick={onClose}>
+        <CloseButton theme={theme} aria-label={t.modal.close} onClick={onClose}>
           <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round'>
             <line x1='18' y1='6' x2='6' y2='18' />
             <line x1='6' y1='6' x2='18' y2='18' />
@@ -162,7 +163,7 @@ export const ProjectModal = ({ project, onClose }) => {
         <Carousel images={project.gallery} />
 
         <Title theme={theme}>{project.title}</Title>
-        <Description theme={theme}>{project.description}</Description>
+        <Description theme={theme}>{pick(project.description, lang)}</Description>
 
         <TechStack>
           {project.tech.map((tech) => (
@@ -172,7 +173,7 @@ export const ProjectModal = ({ project, onClose }) => {
 
         <Links>
           <LinkButton href={project.liveLink} target='_blank' rel='noopener noreferrer' theme={theme} primary>
-            Ver demo
+            {t.modal.viewDemo}
           </LinkButton>
           <LinkButton
             href={project.githubLink}
