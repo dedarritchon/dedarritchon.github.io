@@ -5,6 +5,7 @@ export * from './Footer';
 export * from './Profile';
 export * from './Services';
 export * from './Projects';
+export * from './Experience';
 export * from './Testimonials';
 export * from './Contact';
 export * from './Reveal';

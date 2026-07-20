@@ -1,6 +1,7 @@
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+  // Native smooth scroll fights Locomotive / touch inertia; anchors use scrollTo.
+  scroll-behavior: auto;
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 

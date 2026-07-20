@@ -13,7 +13,7 @@ const Bar = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ scrolled }) => (scrolled ? '0.75rem 1.5rem' : '1.25rem 1.5rem')};
+  padding: ${({ $scrolled }) => ($scrolled ? '0.75rem 1.5rem' : '1.25rem 1.5rem')};
   max-width: 1120px;
   margin: 0 auto;
   transition: padding 0.25s ease;
@@ -29,11 +29,11 @@ const BarInner = styled.div`
   left: 0;
   right: 0;
   z-index: 99;
-  height: ${({ scrolled }) => (scrolled ? '64px' : '80px')};
-  background: ${({ scrolled, theme }) => (scrolled ? 'rgba(10, 14, 39, 0.75)' : 'transparent')};
-  backdrop-filter: ${({ scrolled }) => (scrolled ? 'blur(14px)' : 'none')};
-  -webkit-backdrop-filter: ${({ scrolled }) => (scrolled ? 'blur(14px)' : 'none')};
-  border-bottom: 1px solid ${({ scrolled, theme }) => (scrolled ? theme.border : 'transparent')};
+  height: ${({ $scrolled }) => ($scrolled ? '64px' : '80px')};
+  background: ${({ $scrolled }) => ($scrolled ? 'rgba(10, 14, 39, 0.75)' : 'transparent')};
+  backdrop-filter: ${({ $scrolled }) => ($scrolled ? 'blur(14px)' : 'none')};
+  -webkit-backdrop-filter: ${({ $scrolled }) => ($scrolled ? 'blur(14px)' : 'none')};
+  border-bottom: 1px solid ${({ $scrolled, theme }) => ($scrolled ? theme.border : 'transparent')};
   transition: all 0.25s ease;
 `;
 
@@ -130,11 +130,11 @@ const LangButton = styled.button`
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
   transition: background 0.2s ease, color 0.2s ease;
-  color: ${({ active, theme }) => (active ? '#fff' : theme.secondaryTextColor)};
-  background: ${({ active, theme }) => (active ? theme.cta : 'transparent')};
+  color: ${({ $active, theme }) => ($active ? '#fff' : theme.secondaryTextColor)};
+  background: ${({ $active, theme }) => ($active ? theme.cta : 'transparent')};
 
   &:hover {
-    color: ${({ active, theme }) => (active ? '#fff' : theme.primaryTextColor)};
+    color: ${({ $active, theme }) => ($active ? '#fff' : theme.primaryTextColor)};
   }
 `;
 
@@ -156,7 +156,7 @@ const MobileMenu = styled.div`
   display: none;
 
   @media (max-width: 820px) {
-    display: ${({ open }) => (open ? 'flex' : 'none')};
+    display: ${({ $open }) => ($open ? 'flex' : 'none')};
     flex-direction: column;
     position: fixed;
     top: 64px;
@@ -224,7 +224,7 @@ export const Navbar = () => {
       <GlobeIcon theme={theme} />
       <LangButton
         theme={theme}
-        active={lang === 'es'}
+        $active={lang === 'es'}
         aria-pressed={lang === 'es'}
         onClick={() => setLang('es')}
       >
@@ -232,7 +232,7 @@ export const Navbar = () => {
       </LangButton>
       <LangButton
         theme={theme}
-        active={lang === 'en'}
+        $active={lang === 'en'}
         aria-pressed={lang === 'en'}
         onClick={() => setLang('en')}
       >
@@ -243,8 +243,8 @@ export const Navbar = () => {
 
   return (
     <>
-      <BarInner scrolled={scrolled} theme={theme} />
-      <Bar scrolled={scrolled} theme={theme}>
+      <BarInner $scrolled={scrolled} theme={theme} />
+      <Bar $scrolled={scrolled} theme={theme}>
         <Brand href='#inicio' theme={theme} onClick={(e) => handleNav(e, '#inicio')}>
           Daniel<span>.</span>Darritchon
         </Brand>
@@ -269,7 +269,7 @@ export const Navbar = () => {
           </MenuButton>
         </RightGroup>
       </Bar>
-      <MobileMenu open={open} theme={theme}>
+      <MobileMenu $open={open} theme={theme}>
         {t.nav.links.map((l) => (
           <MobileLink key={l.href} href={l.href} theme={theme} onClick={(e) => handleNav(e, l.href)}>
             {l.label}

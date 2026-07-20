@@ -5,10 +5,10 @@ import useScrollReveal from './../hooks/useScrollReveal';
 
 const Wrapper = styled.div`
   height: 100%;
-  opacity: ${({ inView }) => (inView ? 1 : 0)};
-  transform: ${({ inView, hiddenTransform }) => (inView ? 'none' : hiddenTransform)};
-  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${({ delay }) => delay}ms,
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${({ delay }) => delay}ms;
+  opacity: ${({ $inView }) => ($inView ? 1 : 0)};
+  transform: ${({ $inView, $hiddenTransform }) => ($inView ? 'none' : $hiddenTransform)};
+  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${({ $delay }) => $delay}ms,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${({ $delay }) => $delay}ms;
   will-change: opacity, transform;
 `;
 
@@ -29,9 +29,9 @@ export const Reveal = ({ children, from = 'up', delay = 0, distance = 28, thresh
   return (
     <Wrapper
       ref={ref}
-      inView={inView}
-      hiddenTransform={hiddenTransform}
-      delay={delay}
+      $inView={inView}
+      $hiddenTransform={hiddenTransform}
+      $delay={delay}
       className={className}
     >
       {children}

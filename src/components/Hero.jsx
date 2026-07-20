@@ -355,7 +355,7 @@ const CIRCUIT_PATHS = [
   { d: 'M45,275 H25', depth: 4, node: [25, 275] },
 ];
 
-const CircuitLayer = React.memo(({ active, theme }) => {
+const CircuitLayer = React.memo(function CircuitLayer({ active, theme }) {
   const sparkPaths = useMemo(
     () => CIRCUIT_PATHS.filter((path) => path.depth <= SPARK_DEPTH_MAX),
     [],

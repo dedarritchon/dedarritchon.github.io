@@ -50,14 +50,17 @@ export const SmoothScrollProvider = ({ header, children }) => {
     const prefersReduced =
       window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Smooth virtual scroll feels great on desktop, but on touch devices it
+    // fights native inertia (lerp catch-up → inconsistent speed / jiggle).
+    // Keep native scrolling under the tablet breakpoint.
     const instance = new LocomotiveScroll({
       el,
       smooth: !prefersReduced,
-      lerp: 0.08,
+      lerp: 0.1,
       getDirection: true,
       class: 'is-inview',
-      tablet: { smooth: true, breakpoint: 1024 },
-      smartphone: { smooth: true },
+      tablet: { smooth: false, breakpoint: 1024 },
+      smartphone: { smooth: false },
     });
     instanceRef.current = instance;
 

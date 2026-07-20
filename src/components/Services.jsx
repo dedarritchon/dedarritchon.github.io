@@ -69,7 +69,7 @@ const CompassIcon = () => (
   <svg {...iconProps}><circle cx='12' cy='12' r='10' /><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76' /></svg>
 );
 
-const SERVICE_ICONS = [<CodeIcon />, <PlugIcon />, <CloudIcon />, <CompassIcon />];
+const SERVICE_ICONS = [CodeIcon, PlugIcon, CloudIcon, CompassIcon];
 
 // Delays y distancias desordenadas para que las cards floten en distinto orden.
 const CARD_REVEAL = [
@@ -83,7 +83,7 @@ export const Services = () => {
   const { theme, t } = useContext(AppContext);
   const onAnchorClick = useAnchorScroll();
   const s = t.services;
-  const services = s.items.map((item, i) => ({ ...item, icon: SERVICE_ICONS[i] }));
+  const services = s.items.map((item, i) => ({ ...item, Icon: SERVICE_ICONS[i] }));
 
   return (
     <Section id='servicios'>
@@ -110,7 +110,7 @@ export const Services = () => {
               distance={reveal.distance}
             >
               <Card theme={theme}>
-                <IconWrap theme={theme}>{item.icon}</IconWrap>
+                <IconWrap theme={theme}>{item.Icon ? <item.Icon /> : null}</IconWrap>
                 <CardTitle theme={theme}>{item.title}</CardTitle>
                 <CardText theme={theme}>{item.text}</CardText>
               </Card>

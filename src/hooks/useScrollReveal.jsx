@@ -10,14 +10,15 @@ const prefersReducedMotion = () =>
 // con IntersectionObserver). Respeta prefers-reduced-motion.
 export const useScrollReveal = ({ threshold = 0.15, rootMargin = '0px 0px -10% 0px', once = true } = {}) => {
   const ref = useRef(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(
+    () => prefersReducedMotion() || typeof IntersectionObserver === 'undefined'
+  );
 
   useEffect(() => {
     const node = ref.current;
     if (!node) {return;}
 
     if (prefersReducedMotion() || typeof IntersectionObserver === 'undefined') {
-      setInView(true);
       return;
     }
 

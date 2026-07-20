@@ -13,8 +13,11 @@ const Pin = styled.div`
     $enabled
       ? `
     height: 100vh;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
+    /* Clear fixed navbar so cards stay centered and don't crop under it */
+    padding: 96px 0 48px;
     overflow: hidden;
   `
       : `
@@ -32,12 +35,12 @@ const GUTTER = 'max(1.5rem, calc((100vw - 1120px) / 2 + 1.5rem))';
 const Track = styled.div`
   display: flex;
   align-items: stretch;
-  gap: 1.75rem;
-  padding: 1rem ${GUTTER};
+  gap: 2.5rem;
+  padding: 0 ${GUTTER};
   backface-visibility: hidden;
 
   @media (max-width: 900px) {
-    padding: 1rem 1.25rem;
+    padding: 0 1.25rem;
   }
 `;
 

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ThemeProvider } from './AppContext';
 import { SmoothScrollProvider } from './../hooks/useLocomotive';
-import { Navbar, Hero, Profile, Services, Projects, Testimonials, Contact, Footer, InteractiveBackground } from './../components';
+import { Navbar, Hero, Profile, Services, Projects, Experience, Testimonials, Contact, Footer, InteractiveBackground } from './../components';
 import './app.scss';
 
 const App = () => {
@@ -16,6 +16,7 @@ const App = () => {
             <Profile />
             <Services />
             <Projects />
+            <Experience />
             <Testimonials />
             <Contact />
           </main>

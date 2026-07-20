@@ -76,8 +76,10 @@ export const translations = {
       eyebrow: 'Trayectoria',
       title: 'Experiencia profesional',
       intro:
-        'Actualmente combino en paralelo mi rol de ingeniero en Front con la docencia en la Pontificia Universidad Católica de Chile.',
+        'Actualmente combino en paralelo mi rol de ingeniero de software con la docencia en la Pontificia Universidad Católica de Chile.',
       current: 'Actual',
+      today: 'Hoy',
+      asOf: 'Actualizado al {date}',
     },
     modal: {
       close: 'Cerrar',
@@ -198,8 +200,10 @@ export const translations = {
       eyebrow: 'Career',
       title: 'Professional experience',
       intro:
-        'I currently balance my engineering role at Front with teaching at the Pontificia Universidad Católica de Chile.',
+        'I currently balance my Software engineering role with teaching at the Pontificia Universidad Católica de Chile.',
       current: 'Current',
+      today: 'Today',
+      asOf: 'Updated as of {date}',
     },
     modal: {
       close: 'Close',

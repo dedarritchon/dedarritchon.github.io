@@ -24,16 +24,16 @@ const Slide = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: ${({ active }) => (active ? 1 : 0)};
+  opacity: ${({ $active }) => ($active ? 1 : 0)};
   transition: opacity 0.45s ease;
 `;
 
 const Arrow = styled.button`
   position: absolute;
   top: 50%;
-  ${({ side }) => (side === 'left' ? 'left: 12px;' : 'right: 12px;')}
+  ${({ $side }) => ($side === 'left' ? 'left: 12px;' : 'right: 12px;')}
   transform: translateY(-50%);
-  display: ${({ visible }) => (visible ? 'inline-flex' : 'none')};
+  display: ${({ $visible }) => ($visible ? 'inline-flex' : 'none')};
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -90,8 +90,8 @@ const Thumb = styled.button`
   cursor: pointer;
   padding: 0;
   background: none;
-  border: 2px solid ${({ active, theme }) => (active ? theme.accent : 'transparent')};
-  opacity: ${({ active }) => (active ? 1 : 0.55)};
+  border: 2px solid ${({ $active, theme }) => ($active ? theme.accent : 'transparent')};
+  opacity: ${({ $active }) => ($active ? 1 : 0.55)};
   transition: opacity 0.2s ease, border-color 0.2s ease;
 
   &:hover {
@@ -119,13 +119,14 @@ export const Carousel = ({ images = [] }) => {
   const hasMultiple = count > 1;
 
   const go = useCallback(
-    (next) => setIndex((i) => (next + count) % count),
+    (next) => setIndex(() => (next + count) % count),
     [count]
   );
 
+  const imagesKey = images.map((img) => img.src).join('|');
   useEffect(() => {
     setIndex(0);
-  }, [images]);
+  }, [imagesKey]);
 
   useEffect(() => {
     if (!hasMultiple) {return;}
@@ -143,12 +144,12 @@ export const Carousel = ({ images = [] }) => {
     <Wrapper>
       <Stage theme={theme}>
         {images.map((img, i) => (
-          <Slide key={img.src + i} src={img.src} alt={caption(img, `Imagen ${i + 1}`)} active={i === index} />
+          <Slide key={img.src + i} src={img.src} alt={caption(img, `Imagen ${i + 1}`)} $active={i === index} />
         ))}
-        <Arrow theme={theme} side='left' visible={hasMultiple} aria-label='Imagen anterior' onClick={() => go(index - 1)}>
+        <Arrow theme={theme} $side='left' $visible={hasMultiple} aria-label='Imagen anterior' onClick={() => go(index - 1)}>
           <ArrowIcon dir='left' />
         </Arrow>
-        <Arrow theme={theme} side='right' visible={hasMultiple} aria-label='Imagen siguiente' onClick={() => go(index + 1)}>
+        <Arrow theme={theme} $side='right' $visible={hasMultiple} aria-label='Imagen siguiente' onClick={() => go(index + 1)}>
           <ArrowIcon dir='right' />
         </Arrow>
         {hasMultiple && <Counter theme={theme}>{index + 1} / {count}</Counter>}
@@ -162,7 +163,7 @@ export const Carousel = ({ images = [] }) => {
             <Thumb
               key={img.src + i}
               theme={theme}
-              active={i === index}
+              $active={i === index}
               aria-label={`Ir a imagen ${i + 1}`}
               onClick={() => setIndex(i)}
             >
